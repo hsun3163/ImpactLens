@@ -10,41 +10,58 @@ ImpactLens is a hackathon prototype, not a causal evaluation system or a tool fo
 
 https://impactlens.inacra.chatgpt.site
 
-Public demo with browser-local CSV processing. Source: https://github.com/hsun3163/ImpactLens
+Public demonstration URL. Source: https://github.com/hsun3163/ImpactLens
 
-## What is implemented
+**Version status:** the v2 backend was deployed as Sites publication revision 3 on October 24, 2026. Authenticated save/reopen, server analysis, and stored report downloads have been browser-tested. An imported-synthetic-label correction is awaiting revision 4 verification; GitHub synchronization/new CI are not yet verified. See [delivery evidence](docs/DELIVERY.md) for the exact source revision, passed checks, and limits. Historical v1 results apply only to the former static application.
 
-- Next.js 16 static-export application with React, TypeScript, and Recharts.
-- Official, synthetic-demo, and user-uploaded datasets kept separate.
+## What v2 adds
+
+- A Sites/Vinext application with React, TypeScript, and Recharts, running on Cloudflare Workers rather than a static export.
+- Public official and synthetic demonstrations, plus optional sign-in through Sites' ChatGPT authentication for private, user-owned aggregate projects.
+- Browser-local CSV preview followed by a separate, explicit **Save** action. Selecting a file alone does not upload its contents. Saving sends the aggregate CSV and project name to the backend.
+- D1 project/report metadata and validated aggregate rows, with R2 CSV and generated-report artifacts. Saved projects can be reopened after a reload or on another signed-in device.
+- Server-side validation and deterministic statistics using the same statistical and CSV functions as the browser, plus stored JSON, CSV, and Markdown reports.
+- Owner checks on every private project, analysis, report, and download route. Project identifiers are not public sharing links.
+
+## Preserved evidence features
+
+- Official, synthetic-demo, and user-uploaded datasets remain separate; imported claims never become official provenance.
 - Outcome, follow-up, release-year, and cohort-breakdown exploration; counts, observed rates, trend visualization, and per-row Wilson 95% model intervals.
 - Descriptive cohort comparison with compatibility checks and explicit non-causal interpretation.
-- Strict aggregate CSV validation, browser-memory processing, and downloadable outputs.
+- Strict aggregate CSV validation and downloadable outputs.
 - An inspectable, deterministic five-stage audit workflow: Ingest → Validate → Analyze → Review → Report. It makes **no live language-model calls**.
 - Archived primary sources, extraction evidence, reproducible data preparation, unit tests, and an independent data validator.
 
-No backend, database, paid API, API key, account login, or external coding-agent service is required to run the application. The website fetches bundled public assets; selected CSV contents are processed locally, not uploaded to a server by this application.
+No model API, model API key, external coding-agent service, or paid model subscription is required by the application. Cloud saving does require Sites authentication and provisioned D1/R2 bindings. Hosting/storage quotas or charges are separate from model/API use; this is not a promise of unlimited free hosting.
 
 ## Run locally
 
-Prerequisites: Node.js 24, npm, Python 3, and Poppler's `pdftotext`. On Ubuntu, install Poppler with `sudo apt-get install poppler-utils`.
+Prerequisites: Node.js 24 (package minimum 22.13), npm, Python 3, `curl`, and Poppler's `pdftotext`. On Ubuntu, install Poppler with `sudo apt-get install poppler-utils`.
 
 ```sh
-npm ci
+npm run install:ci
+python3 research/download_sources.py  # restore hash-verified PDFs on a fresh clone
 python3 scripts/prepare_public_data.py
 npm run dev
 ```
 
-Open `http://localhost:3000`. To validate and build:
+For private saving, initialize the local D1 schema using the [backend setup instructions](docs/BACKEND.md#local-setup-and-migrations). Open `http://localhost:5173`. The portable development server supplies a loopback-only mock sign-in for local testing; it is not a production account or proof that hosted authentication works. Do not expose this development server publicly. See [backend operations and API](docs/BACKEND.md) for storage, authentication, and deployment prerequisites.
+
+To validate and build:
 
 ```sh
-python3 research/download_sources.py  # restore hash-verified PDFs on a fresh clone
 npm run typecheck
 npm test
 npm run validate:data
+python3 research/extract_cdcr.py
+python3 scripts/prepare_public_data.py
+git diff --exit-code -- data public/data
 npm run build
 ```
 
-The build uses `next build --webpack` and creates `out/`, suitable for a static host. Tests run with `node --import tsx --test tests/*.test.ts`. The committed GitHub Actions workflow runs the checks on Node 24 and checks regenerated canonical data for drift. A workflow file is not evidence that hosted CI has run successfully; inspect the actual run before claiming a passing build.
+`npm run build` runs the Sites/Vinext build and produces `dist/client/` and `dist/server/wrangler.json`. It no longer creates a deployable static `out/` application. `npm start` runs the built Worker locally through Wrangler; it does not publish the site. Clean clones use the portable build path without requiring checkout-local execution settings.
+
+Tests run with `node --import tsx --test tests/*.test.ts`, including backend security tests. GitHub Actions uses Node 24 and preserves the checksum-verified PDF restoration, independent data validation, and canonical-data drift gates alongside typechecking, tests, and a Worker build. A workflow file is not evidence that hosted CI has passed; inspect the run for the exact commit.
 
 ## Three-minute demo
 
@@ -52,8 +69,9 @@ The build uses `next build --webpack` and creates `out/`, suitable for a static 
 2. Inspect the 19-cohort trend, FY2002–03 through FY2020–21. A point is a different release cohort, not repeated measurement of the same people. Do not add its denominators.
 3. In **Compare cohorts**, select the enhanced-credit breakdown. Credit earners have 5,011/15,029 observed convictions; non-earners have 6,875/15,087. The unrounded difference is approximately −12.23 percentage points, **not a causal credit effect**. Published one-decimal rates yield a slightly different rounded subtraction.
 4. Open **Sources & methods** and follow the original report. Use the source ID and page/table evidence to verify the numerator, denominator, and cohort definition.
-5. In **Upload data**, download the synthetic example CSV, import it, and inspect its explicitly uploaded label. Try an invalid count or forbidden identifier column to demonstrate rejection. Use only public or authorized, non-identifying aggregate data.
+5. In **Upload data**, download the synthetic example CSV, import it, and inspect its explicit synthetic warning. CSV imports remain user-supplied, not verified official evidence. Try an invalid count or forbidden identifier column to demonstrate rejection. Use only public or authorized, non-identifying aggregate data.
 6. Run **Workflow**, inspect each stage, and download its JSON artifact. These are deterministic outputs, not transcripts of autonomous runtime agents.
+7. To exercise persistence, sign in, select **Save dataset**, name the project, confirm its aggregate-only scope, and select **Save aggregate dataset**. In **Saved projects**, reopen it after a reload, then run server analysis or **Generate & save report**. Stored reports use all saved rows, not current dashboard filters; **Export brief** remains browser-local and filtered. These operations were exercised against publication revision 3; see the delivery record for the separate uploaded-synthetic-label regression still pending.
 
 ## Evidence baseline
 
@@ -97,14 +115,18 @@ A changed upstream PDF fails the downloader's hash check rather than silently re
 - Matching labels and follow-up windows do not establish exchangeability. Selection, baseline differences, policy, measurement, and follow-up can explain observed differences.
 - Wilson intervals are binomial model intervals, not official CDCR estimates, causal-effect intervals, or sampling uncertainty about a fully observed administrative population.
 - Upload limits are 1 MiB and 5,000 rows. The importer rejects unknown/identifier columns and invalid counts; it cannot detect every identifier hidden in free-text labels or prevent small-cell re-identification. This is **not a de-identification guarantee**.
-- Browser-local does not mean inaccessible to browser extensions, screen sharing, local downloads, or someone using the device. Hosting providers can receive ordinary page/asset requests. Do not place confidential individual records into this prototype.
+- Importing a file only previews it in browser memory. Explicitly saving a project transmits its name and aggregate CSV to the application backend and persists validated rows and artifacts in D1/R2. Saved data does not disappear when the tab closes or the user signs out.
+- Cloud saves also require normalized row JSON to fit within 1.5 MiB. The prototype limits each user to 25 projects and each project to 20 stored reports. These application limits are not a storage-service guarantee. There is no end-user deletion, retention-policy management, team sharing, or regulated-data compliance claim in v2.
+- Owner scoping depends on the trusted Sites authentication gateway. Never deploy the Worker as an unprotected origin that accepts caller-supplied identity headers.
+- Browser-local does not mean inaccessible to browser extensions, screen sharing, local downloads, or someone using the device. Hosting providers receive ordinary requests and explicitly saved content. Use only public or authorized non-identifying aggregates; do not place confidential individual records into this prototype.
 
 ## Engineering and next steps
 
 - [Architecture](docs/ARCHITECTURE.md)
+- [Backend operations and API](docs/BACKEND.md)
 - [Statistical methods and CSV contract](docs/STATISTICAL_METHODS.md)
 - [Data dictionary](data/data_dictionary.md)
 - [Development roles and deterministic workflow](docs/AGENT_WORKFLOW.md)
 - [Evaluation roadmap](docs/EVALUATION_ROADMAP.md)
 
-The roadmap describes future, governed evaluation work. The public application is deployed and browser-tested; source, tests, provenance and CI are in this repository. See [delivery evidence](docs/DELIVERY.md), [independent data validation](docs/VALIDATION.md), and [browser verification](docs/UI_VALIDATION.md). The Actions badge reflects current repository checks.
+The roadmap describes future, governed evaluation work, not capabilities conferred by adding a database. See [delivery evidence](docs/DELIVERY.md), [independent data validation](docs/VALIDATION.md), and [browser verification](docs/UI_VALIDATION.md). Historical v1 evidence is explicitly separated from verified v2 publication revision 3 checks and remaining revision 4/GitHub CI work. The Actions badge reflects repository checks, not a guarantee of hosted authentication, persistence, or security.

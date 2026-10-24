@@ -11,6 +11,20 @@ test('minimal schema succeeds and uploaded provenance cannot be spoofed', () => 
   assert.equal(result.rows[0].dataKind, 'uploaded');
   assert.equal(result.rows[0].missingOutcomes, undefined);
 });
+test('browser CSV imports preserve explicit synthetic warnings without trusting official claims', () => {
+  const synthetic = { ...row, dataKind: 'synthetic' as const };
+  const parsed = parseAggregateCsv(aggregateRowsToCsv([synthetic]));
+  assert.deepEqual(parsed.errors, []);
+  assert.deepEqual(parsed.rows, [synthetic]);
+  assert.match(parsed.warnings.join(' '), /synthetic labels.*demonstration warnings/i);
+  for (const kind of ['official', 'uploaded', 'unverified', '']) {
+    const result = parseAggregateCsv(`${header},dataKind\n${line},${kind}`);
+    assert.deepEqual(result.errors, []);
+    assert.equal(result.rows[0].dataKind, 'uploaded');
+  }
+  const omitted = parseAggregateCsv(`${header}\n${line}`);
+  assert.equal(omitted.rows[0].dataKind, 'uploaded');
+});
 test('quoted commas, escaped quotes, newlines, BOM and CRLF are supported', () => {
   const text = `\uFEFF${header}\r\none,2019,age,"Group, ""A""\nlabel",100,25,Reconviction,36,report,10\r\n`;
   const result = parseAggregateCsv(text);

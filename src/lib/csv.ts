@@ -90,12 +90,13 @@ export function parseAggregateCsv(text: string): ValidationResult {
       // Explicit decimal syntax avoids accepting whitespace, hex, Infinity or NaN as counts.
       row[header] = numeric.has(header) ? (/^(?:\d+(?:\.\d+)?|\.\d+)$/.test(value) ? Number(value) : NaN) : value;
     });
-    row.dataKind = 'uploaded';
+    // Preserve a declared fake-data warning; never trust a claim of official provenance.
+    row.dataKind = row.dataKind === 'synthetic' ? 'synthetic' : 'uploaded';
     return row;
   });
   const result = validateAggregateRows(rows);
   errors.push(...result.errors);
-  return { rows: errors.length ? [] : result.rows, errors, warnings: ['Uploaded rows are always labeled uploaded, regardless of any supplied dataKind.', ...result.warnings] };
+  return { rows: errors.length ? [] : result.rows, errors, warnings: ['Explicit synthetic labels are retained as demonstration warnings, not verification; all other supplied data kinds are labeled uploaded and are not independently verified.', ...result.warnings] };
 }
 
 /** Quote and neutralize spreadsheet formulas, including prefixes hidden behind whitespace. */

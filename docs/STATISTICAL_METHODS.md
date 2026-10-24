@@ -4,7 +4,7 @@
 
 Each row describes one cohort, outcome, release-year label and follow-up duration. The displayed percentage is exactly `100 × events / denominator`. Counts are authoritative; an uploaded rate column is rejected rather than trusted or reconciled. No rows are summed automatically: different grouping dimensions, follow-up windows, overall totals and subgroups can describe the same people.
 
-A valid denominator is a positive safe integer; events are a safe integer between zero and denominator. Follow-up months must be finite and at least one. Release year is a nonempty text label, supporting fiscal-year labels. The importer cannot verify that outcome wording, dates or cohort membership are substantively correct.
+A valid denominator is a positive safe integer; events are a safe integer between zero and denominator. Follow-up months must be a positive safe integer. Release year is a nonempty text label, supporting fiscal-year labels. The importer cannot verify that outcome wording, dates or cohort membership are substantively correct.
 
 ## Interval calculation
 
@@ -34,14 +34,14 @@ Required columns:
 - `denominator`: positive integer observed-outcome count.
 - `events`: integer event count from zero through denominator.
 - `outcome`: precise outcome definition, such as reconviction, not a generic success label.
-- `followupMonths`: finite number at least 1.
+- `followupMonths`: positive safe integer number of months.
 - `sourceId`: source report or dataset label.
 - `sourcePage`: source page, table or other locator. Use an explicit descriptive locator for unpaginated sources.
 
 Optional columns:
 - `program`: nonempty program label.
 - `missingOutcomes`: nonnegative integer; a blank cell means unknown.
-- `dataKind`: accepted for export round-trips, but every imported row is forcibly labeled `uploaded`. A supplied `official` label never establishes provenance.
+- `dataKind`: accepted for export round-trips. Both browser import and server parsing preserve an explicit `synthetic` label to keep invented-value warnings. Every other supplied kind, including `official`, becomes `uploaded`. A supplied label never establishes verified provenance.
 
 All other columns are rejected, including supplied rates and source URL columns. Source links belong in the dashboard's separately maintained source registry. Personal-identifier columns such as email, participant ID, CDCR number, date of birth and names are forbidden. Free-text labels cannot be reliably screened for identifiers: users must supply only appropriately aggregated, non-identifying data they are authorized to use. This schema is not an anonymization or de-identification guarantee. Avoid small-cell data that could identify people. Text labels are limited to 500 characters.
 
@@ -53,11 +53,17 @@ example-a,2020,participation,Program participants,100,25,Reconviction,36,nonprof
 example-b,2020,participation,Comparison group,120,36,Reconviction,36,nonprofit-report,Table 2,,
 ```
 
-Example numbers are illustrative, not official findings. Uploaded rows are validated entirely in the browser by the prototype; validation rejects the whole file when any row fails, rather than silently excluding invalid rows. The CSV reader uses explicit decimal numeric syntax, not hexadecimal, scientific notation or permissive `parseFloat`. Zero denominators, negative or fractional event counts, duplicate IDs, unexpected fields, malformed quoting and nonfinite numbers are rejected.
+Example numbers are illustrative, not official findings. Imported rows are first validated in the browser. If the user explicitly saves a project, the server independently parses and validates the CSV using the same shared schema. Both paths reject the whole file when any row fails, rather than silently excluding invalid rows. Browser import is not itself a server upload. The CSV reader uses explicit decimal numeric syntax, not hexadecimal, scientific notation or permissive `parseFloat`. Zero denominators, negative or fractional event counts, duplicate IDs, unexpected fields, malformed quoting and nonfinite numbers are rejected.
 
 ## Export safety and limitations
 
 CSV exports quote every field, double embedded quotes, and prefix spreadsheet-formula-like text with an apostrophe. This can change the literal value of a formula-like text label on reimport, deliberately prioritizing spreadsheet safety. Do not treat uploaded provenance or program labels as authenticated. Keep official, synthetic demonstration and uploaded datasets separate.
+
+## Server calculation and saved-report scope
+
+The v2 backend uses the shared `src/lib/analysis.ts` and `src/lib/csv.ts` functions rather than a separate statistical implementation. Saving never upgrades uploaded provenance to official. A server result remains descriptive and subject to the same overlap, denominator, missingness, and binomial-model limits described above.
+
+Stored reports describe every saved project row. They retain explicit synthetic warnings but never grant official provenance to a saved user-supplied snapshot. Browser filters and a browser-local export should not be assumed to change a saved project or previously generated report. No model-generated analysis, pooled cross-dimension denominator, causal estimate, or individual risk score is added by server persistence.
 
 ## Verification
 

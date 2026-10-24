@@ -1,5 +1,37 @@
 # UI validation record
 
+## v2 backend: deployed browser verification, publication revision 3
+
+Checked on 2026-10-24 against https://impactlens.inacra.chatgpt.site after publication at **14:27:39 UTC**, hosting source commit `a3bebddec24e503601e2502ed1f7464731fc6d61`. Checks used the cloud browser. This is evidence for the v2 backend architecture, distinct from the historical v1 static-site checks below.
+
+### Authenticated browser flows passed
+
+- Signed in through Sites and explicitly saved an aggregate project.
+- Reloaded the application and reopened the saved project, demonstrating hosted persistence beyond browser state.
+- Ran server analysis and checked the expected aggregate results.
+- Generated a stored report and refreshed report history.
+- Downloaded the actual JSON, CSV, and Markdown artifacts and inspected their content: six expected synthetic rows, correct counts/rates, and retained synthetic labels when saving the built-in Demo dataset.
+- Signed out, confirmed private endpoints denied access while the public demo remained usable, and signed in again successfully.
+- Inspected the desktop layout at a 1,173-pixel viewport; no horizontal overflow was observed.
+
+### Separate API/runtime evidence
+
+- Eleven live anonymous/security checks passed, including private-route rejection and stripping of forged identity headers at the deployed authentication gateway. Public canonical data matches the 38-row evidence baseline.
+- Thirteen checks against the actual locally built Worker with D1/R2 passed, including owner isolation, cross-origin mutation rejection, server analysis, report/history storage, all three artifact formats, and persistence through a full Worker process restart.
+- These local owner-isolation tests used synthetic identities. They are not evidence of a two-account hosted browser test.
+
+### Finding requiring publication revision 4
+
+The built-in Demo snapshot retained synthetic labels, but importing a CSV containing explicit synthetic labels could relabel it as uploaded. The correction is in progress. The final source revision, publication, test rerun, and browser regression for this imported-CSV path remain pending. Do not describe the v3 pass as verification of that later fix.
+
+### Verification limits
+
+Mobile viewport testing was unavailable, so this pass does not establish mobile/physical-device behavior. No two-account hosted isolation test or full browser accessibility audit is claimed. Unit/local checks for invalid input, quota limits, and request controls are not a substitute for exercising every failure and interrupted/repeated-action path in the hosted browser.
+
+The following entries preserve historical v1 observations, including an initial blocked attempt and later successful deployed checks. Their timestamps, static-build details, and old test counts do not override this v2 record.
+
+## Historical v1 verification
+
 Checked 2026-10-24. This record distinguishes source/unit verification from actual browser interaction.
 
 ## Browser setup and current limit

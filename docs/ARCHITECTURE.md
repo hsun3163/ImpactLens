@@ -1,57 +1,84 @@
 # Architecture
 
-## Scope
+## Scope and version boundary
 
-ImpactLens is a static, client-side evidence exploration application. Next.js 16 exports HTML, JavaScript, styles, and public data into `out/`. React manages browser state; Recharts renders descriptive visualizations. There is no application backend, persistent upload store, model gateway, or runtime agent orchestrator.
+ImpactLens v2 is a Sites/Vinext application on Cloudflare Workers. React manages the dashboard and local preview state; Recharts renders descriptive visualizations. D1 stores owner-scoped project/report records and validated aggregate rows; R2 stores normalized CSV and generated report artifacts. The public evidence explorer remains usable without saving a project.
 
-## Data flow and trust boundaries
+v1 was a browser-only Next.js static export. Historical static-site build and browser results in `DELIVERY.md` and `UI_VALIDATION.md` apply only to that version unless explicitly replaced by v2 evidence. A backend implementation or successful build is not, by itself, proof of deployed persistence or authentication.
 
-1. **Primary evidence:** locally archived CDCR PDFs under `research/`, with hashes, byte sizes, original URLs, and access dates in committed `data/sources.json`. Raw PDFs, extracted text, and inspection PNGs are excluded from Git; `research/download_sources.py` restores the PDFs and verifies their recorded hashes before validation.
-2. **Extraction:** `research/extract_cdcr.py` invokes Poppler `pdftotext -layout`, extracts reviewed table lines, and writes `data/official_cdcr.json`, CSV, and row-level extraction evidence. These source-rich records retain published rounded rates and printed/PDF page locators.
-3. **Public projection:** `scripts/prepare_public_data.py` creates browser-ready `public/data/official.json`, `official.csv`, and supporting metadata. The projection deliberately follows the strict application schema rather than passing arbitrary raw-source fields into the importer.
-4. **Independent verification:** `scripts/validate_data.py` separately reads the archived PDFs and checks source hashes, token-position extraction, counts, rounding, row coverage, provenance, CSV/JSON parity, and partition totals. It does not rely on importing the extraction producer.
-5. **Runtime ingestion:** the browser loads static public assets or reads a user-selected aggregate CSV into memory. Uploaded data is always labeled `uploaded`, even if the file claims `official` provenance.
-6. **Analysis and presentation:** shared TypeScript functions derive rates, Wilson intervals, coverage when known, and comparison compatibility. UI filters select rows without pooling overlapping records.
-7. **Exports:** browser-generated CSV/JSON downloads remain under the user's control. They are not server submissions. CSV text is escaped and formula-like prefixes neutralized by the shared export helper.
+There is no live language-model gateway, runtime agent orchestrator, individual-level record system, or causal evaluation engine.
 
-The source registry is maintained with the application, not populated from arbitrary uploaded URLs. An uploaded source ID or cohort label is a claim supplied by the user, not authenticated evidence.
+## Evidence preparation
+
+1. **Primary evidence:** locally archived CDCR PDFs under `research/`, with hashes, byte sizes, original URLs, and access dates in committed `data/sources.json`. Raw PDFs, extracted text, and inspection PNGs are excluded from Git; `research/download_sources.py` restores the PDFs and verifies their recorded hashes.
+2. **Extraction:** `research/extract_cdcr.py` invokes Poppler `pdftotext -layout`, extracts reviewed table lines, and writes source-rich CSV/JSON records and row-level extraction evidence. Records retain published rounded rates and printed/PDF page locators.
+3. **Public projection:** `scripts/prepare_public_data.py` creates strict-schema `public/data/official.json`, `official.csv`, and supporting metadata. Generated public assets must not be hand-edited.
+4. **Independent verification:** `scripts/validate_data.py` separately reads the archived PDFs and checks hashes, table extraction, counts, rounding, row coverage, provenance, CSV/JSON parity, and partition totals without importing the producer.
+
+These preparation steps are not scheduled runtime data acquisition. The application does not autonomously discover new reports or refresh official evidence.
+
+## Runtime data flow and trust boundaries
+
+1. **Public exploration:** the browser loads bundled official or synthetic assets and calculates descriptive views. Dataset modes remain distinct.
+2. **Local import:** a selected CSV is read and validated in browser memory. No selected CSV content is sent by this step. Explicit `synthetic` labels are retained as warnings about invented values; every other supplied kind, including `official`, becomes `uploaded`. This is warning preservation, not authentication of provenance.
+3. **Explicit cloud save:** a signed-in user chooses to save a named project. The browser sends the CSV and name to a same-origin API. The server independently enforces byte/row/schema/count limits using the shared validator; client validation is not an authorization or integrity boundary.
+4. **Persistence:** the backend associates the project with the authenticated Sites user ID, stores validated rows and metadata in D1, and writes normalized CSV to private R2 storage. A reload or sign-out does not delete this data. Explicit synthetic warnings survive browser import, saving, reopening, analysis, and reports; official claims are downgraded to user-supplied `uploaded` provenance.
+5. **Server analysis:** a private analysis request loads the authenticated user's saved rows and uses the same deterministic TypeScript statistics as the browser. It does not accept client-computed percentages as authoritative.
+6. **Stored reports:** an explicit report request generates deterministic JSON, safe CSV, and Markdown artifacts for the saved project, stores them in R2, and records metadata in D1. Reports are reproducible software output, not model reasoning or expert certification.
+7. **Authorized download:** downloads resolve an owner-scoped D1 report before reading its R2 artifact. No direct public object URL or share-by-ID route is exposed.
+
+Browser-generated exports and workflow artifacts remain local downloads. Stored server reports are a separate persistence path over all saved project rows, not the current dashboard selection. Neither path authenticates an uploaded source ID, label, or cohort definition. The official source registry is maintained with the application, not populated by following arbitrary uploaded URLs.
+
+## Authentication and authorization
+
+The application relies on Sites' trusted authentication gateway, which supplies `oai-authenticated-user-id` and `oai-authenticated-user-email`. Login/logout use the Sites routes, not an application-managed password database. The backend uses the user ID for ownership and does not persist the email or display name in project/report tables.
+
+All private routes require identity and constrain reads/writes by the authenticated owner. A project or report UUID is only an identifier, not an access capability. Mutations require a matching `Origin` and reject `Sec-Fetch-Site: cross-site`. Private responses are not intended for shared caching. See `BACKEND.md` for the endpoint contract and exact runtime limits.
+
+This trust model requires an ingress that strips untrusted identity headers and injects verified identity. Publishing an alternate direct Worker origin that trusts caller-supplied headers would invalidate it. Verify the actual hosted gateway, unauthenticated denial, and cross-user isolation before treating the deployment as verified.
+
+Portable local development includes a loopback-only mock Sites sign-in. It is for exercising the UI, not validating real ChatGPT authentication. Unit tests with synthetic identities prove application behavior under those inputs, not the production gateway's identity guarantees.
 
 ## Code map
 
 | Location | Responsibility |
 | --- | --- |
-| `src/app/` | Dashboard, interaction, layout, and styles |
-| `src/lib/types.ts` | Aggregate-row and result contracts |
-| `src/lib/analysis.ts` | Wilson intervals, summaries, descriptive comparisons |
-| `src/lib/csv.ts` | Strict CSV parsing, validation, safe CSV export |
-| `tests/` | Deterministic statistical, parser, and bundled-data tests |
-| `research/` | Archived evidence, acquisition, extraction, research notes |
-| `data/` | Source-rich normalized evidence and source registry |
-| `public/data/` | Generated static browser assets |
-| `scripts/` | Public projection and independent validation |
-| `.github/workflows/ci.yml` | Clean-install checks and reproducibility gate |
+| `src/app/` | Dashboard, layout, styles, auth helper, API route adapter |
+| `src/lib/types.ts` | Aggregate-row and statistical result contracts |
+| `src/lib/analysis.ts` | Shared Wilson intervals, summaries, descriptive comparisons |
+| `src/lib/csv.ts` | Shared strict CSV parsing, validation, safe CSV export |
+| `src/server/` | Authenticated project API, persistence, server analysis/report generation |
+| `db/`, `drizzle/` | D1 schema and generated migrations |
+| `worker/`, `vite.config.ts` | Vinext Worker entry point and Sites/Cloudflare build configuration |
+| `.openai/hosting.json` | Sites project and `DB`/`BUCKET` binding names |
+| `tests/` | Statistical, CSV, bundled-data, backend, and security tests |
+| `research/`, `data/` | Evidence acquisition, extraction, source-rich records and registry |
+| `public/data/` | Generated public browser assets |
+| `scripts/` | Portable build/install support, public projection, independent validation |
+| `.github/workflows/ci.yml` | Clean-install checks, source restoration, reproduction, Worker build |
 
 ## Statistical contract
 
 A row is one aggregate cohort with a defined release year, grouping dimension, outcome, follow-up duration, numerator, denominator, and provenance. It is never a person. Counts determine rates; imported percentage columns are rejected. Optional missing-outcome counts describe otherwise eligible people outside the observed denominator; omission means unknown coverage.
 
-Comparisons require compatible dimensions, release-year labels, outcomes, windows, and data kinds. They reject identical records and obvious overall/subgroup comparisons. These guards are necessary but not sufficient: they cannot prove disjoint membership, equal measurement, or exchangeability. Results are unadjusted descriptive differences. No hypothesis test, adjusted treatment effect, survival estimator, or risk-difference interval is implemented. See `STATISTICAL_METHODS.md` for exact formulas and limits.
+Comparisons require compatible dimensions, release-year labels, outcomes, windows, and data kinds. They reject identical records and obvious overall/subgroup comparisons. These guards cannot prove disjoint membership, equal measurement, or exchangeability. No hypothesis test, adjusted treatment effect, survival estimator, or risk-difference interval is implemented. Moving calculations to a server does not change their inferential limits. See `STATISTICAL_METHODS.md`.
 
-## Privacy and security properties
+## Privacy, persistence, and operational limits
 
-- No application code sends selected CSV contents to a server; data remains in browser state until discarded or the tab is reloaded/closed.
-- No account system, analytics SDK, API credentials, or persistent client database is needed.
-- Strict headers, bounded file/row sizes, valid integer counts, duplicate-ID rejection, and batch rejection reduce accidental misuse.
-- Identifier-header checks are not semantic PII detection. Free-text labels, small cells, and combinations of public aggregates can still expose information.
-- Local downloads persist outside the app. Extensions, device compromise, screenshots, and host request logging are outside this guarantee.
-- The prototype does not meet a claimed regulated-data compliance standard and must not ingest identifiable justice-system records.
+- CSV preview is local; explicit cloud saving is not. Only public or authorized, non-identifying aggregate data belongs in either path.
+- Strict headers, bounded files/rows, integer counts, duplicate-ID rejection, and whole-batch rejection reduce accidental misuse but do not detect all identifying content or small-cell risks.
+- Persistence is per authenticated user, not per organization or team. There are no collaborator invitations, public report links, or role-management controls.
+- Saved data survives tab closure and logout. No self-service project deletion, retention scheduling, backup/restore guarantees, or regulated-data compliance certification is provided.
+- R2 identifiers are not public links. Access control comes from authenticated owner checks, not from assuming identifiers remain secret.
+- Local downloads, extensions, screenshots, device compromise, hosting administration, and provider logging are outside the application's owner-scoping guarantee.
+- D1 and R2 are separate storage services; a stored report is not a cross-service transaction or backup guarantee. Operational failure and cleanup behavior must be tested, not inferred from the schema.
 
 ## Build and deployment
 
-Use Node 24 and the committed npm lockfile. A fresh-clone data validation requires `python3 research/download_sources.py`, with network access to official CDCR URLs; analysis and extraction thereafter run without network/model calls. `npm run build` produces a static export; no Node server or runtime secret is required at the hosting destination. A deployment must serve `/data/` and Next.js static assets correctly. Deploying under a path prefix needs an explicit configuration review.
+Use Node 24 and the committed npm lockfile. `npm run install:ci` installs locked dependencies; `npm run dev` serves the portable preview at port 5173; `npm run build` produces `dist/client/` and the Worker configuration at `dist/server/wrangler.json`. The old `out/` static export is not a v2 deployment artifact. `npm start` runs a built Worker locally, not a production deployment.
 
-Sites/Cloudflare is an intended static-host destination, initially owner-private where supported. Access controls must be verified on the actual deployment; static export alone does not create privacy protection. Do not infer deployment, public availability, repository creation, or CI success from configuration files. Record verified URLs and check results only after those steps complete.
+The Sites configuration binds D1 as `DB` and R2 as `BUCKET`. Production must provision these bindings, apply the generated D1 migrations, serve the client assets, and retain the trusted auth ingress. The build alone does none of the production access verification. See `BACKEND.md` for the deployment checklist and `DELIVERY.md` for verified outcomes.
 
 ## Deliberately not implemented
 
-Individual-level record ingestion/linkage, nonprofit connectors, identity resolution, cloud persistence, live LLM agents, causal estimation, production authentication/authorization, and automated policy decisions. These require a different governance and threat model, not merely an extra upload field.
+Individual-level record ingestion/linkage, nonprofit connectors, identity resolution, team sharing, live LLM agents, causal estimation, automatic policy decisions, and production-grade data-governance/retention administration. Cloud persistence does not authorize or make these uses safe.

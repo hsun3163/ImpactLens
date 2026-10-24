@@ -2,7 +2,7 @@
 
 ## Current evidence, current limits
 
-The working prototype explores published aggregate counts. It can reproduce source-derived rates, expose denominator and follow-up choices, and flag incompatible comparisons. It cannot estimate a program's causal effect, establish individual outcomes, or connect nonprofit participation records to official justice outcomes. Its independent validator checks data fidelity, not program effectiveness.
+The working prototype explores published aggregate counts. It can reproduce source-derived rates, expose denominator and follow-up choices, and flag incompatible comparisons. It cannot estimate a program's causal effect, establish individual outcomes, or connect nonprofit participation records to official justice outcomes. Its independent validator checks data fidelity, not program effectiveness. The v2 backend adds owner-scoped storage and deterministic report generation; it does not expand the permitted data to identifiable records or add causal identification.
 
 The following stages are proposed work. None implies that consent, legal authority, data agreements, linkage access, a credible comparison group, or causal identification already exists.
 
@@ -16,7 +16,7 @@ Deliverable: a protocol that distinguishes conviction, arrest, reincarceration, 
 
 Obtain an appropriate legal basis, consent where required and meaningful, data-use agreements, ethics/IRB review where applicable, and review by the organizations and communities affected. Define permitted uses, access roles, retention/deletion, auditing, incident response, disclosure review, and withdrawal limitations. Prohibit individual punitive or eligibility decisions based on this dashboard.
 
-Only then consider a separately secured environment for minimum-necessary, pseudonymized participant-level data. Keep linkage identifiers separated from analysis records. Do not retrofit this public browser prototype into a repository for personal justice records. Consent alone does not remove legal, security, or fairness obligations.
+Only then consider a separately secured environment for minimum-necessary, pseudonymized participant-level data. Keep linkage identifiers separated from analysis records. Do not treat the new authenticated aggregate-project backend as a repository for personal justice records. Consent alone does not remove legal, security, or fairness obligations.
 
 Deliverable: a reviewed governance and security plan, not an uploaded spreadsheet of identifiers.
 
@@ -51,5 +51,7 @@ Apply agreed small-cell suppression, complementary suppression, aggregation, and
 Success gates for a later pilot include source fidelity, clear interpretation in user testing, acceptable accessibility, verified privacy controls, adequate outcome coverage, a defensible design, and independent review. Numerical thresholds should be chosen in the protocol with stakeholders, not invented after results are known.
 
 ## Near-term engineering work
+
+Before treating the v2 backend as deployment-verified: verify the Sites authentication gateway, real D1/R2 bindings and migrations, save/reload/report behavior, cross-user isolation, and invalid/cross-origin request rejection. Evaluate retention/deletion, operational recovery, rate limiting, and abuse controls before broader use.
 
 Before a broader deployment: complete browser-level regression and accessibility testing, verify deployment access controls, review dependency/security updates, test upload/export behavior across browsers, and confirm that warning language is understood. Further datasets need their own provenance review, outcome/denominator mapping, independent extraction checks, and explicit separation from the current official baseline.

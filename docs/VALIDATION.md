@@ -1,5 +1,15 @@
 # Independent data and calculation validation
 
+## Version and scope
+
+The detailed PDF review and independent numerical references below were recorded for the v1 official-data baseline on 24 October 2026. The v2 backend reuses the shared strict CSV/statistical functions and unchanged canonical evidence. Historical PDF validation does not, by itself, validate authentication, D1/R2 storage, owner isolation, deployment, or stored report delivery. Those checks are recorded separately in DELIVERY.md and UI_VALIDATION.md.
+
+### v2 verification update, publication revision 3
+
+The backend release published at 14:27:39 UTC on 2026-10-24 used hosting source `a3bebddec24e503601e2502ed1f7464731fc6d61`. Its automated suite passed 37 tests. Thirteen checks against the actual built local Worker with D1/R2 passed, including server-computed rates/Wilson intervals and stored reports surviving a process restart. The deployed canonical dataset matches all 38 official rows; authenticated browser inspection confirmed the six-row synthetic report contents and correct rates.
+
+These results preserve the distinction between source fidelity, deterministic calculation, storage behavior, and hosted access. They do not establish causal validity or de-identification. A synthetic-label import correction is being prepared for publication revision 4; the final revision's rerun and hosted GitHub CI status remain pending.
+
 Review date: 2026-10-24. Scope: the selected 38-row official CDCR aggregate extract, its archived PDFs, source manifest, exact-text evidence, and deterministic statistical core. This is not validation of individual records, the original CDCR administrative systems, or causal program effects.
 
 ## Reproduce

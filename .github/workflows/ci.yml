@@ -20,12 +20,12 @@ jobs:
       - name: Install PDF extraction dependency
         run: sudo apt-get update && sudo apt-get install --yes poppler-utils
       - name: Install locked dependencies
-        run: npm ci
+        run: npm run install:ci
       - name: Typecheck
         run: npm run typecheck
       - name: Restore checksum-verified official PDFs
         run: python3 research/download_sources.py
-      - name: Unit tests
+      - name: Unit and backend security tests
         run: npm test
       - name: Independently verify source data
         run: npm run validate:data
@@ -34,5 +34,11 @@ jobs:
           python3 research/extract_cdcr.py
           python3 scripts/prepare_public_data.py
           git diff --exit-code -- data public/data
-      - name: Build static site
+      - name: Build Worker and client assets
         run: npm run build
+      - name: Verify backend deployment artifacts
+        run: |
+          test -d dist/client
+          test -f dist/server/wrangler.json
+          test -f dist/.openai/hosting.json
+          test -n "$(find dist/.openai/drizzle -maxdepth 1 -name '*.sql' -print -quit)"
