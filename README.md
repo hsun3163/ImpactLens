@@ -12,7 +12,14 @@ https://impactlens.inacra.chatgpt.site
 
 Public demonstration URL. Source: https://github.com/hsun3163/ImpactLens
 
-**Version status:** the v2 backend is live as Sites publication revision 4, deployed October 24, 2026. Authenticated save/reopen, server analysis, and stored report downloads have been browser-tested, including synthetic-label preservation through imported CSV reports. The backend source is pushed to GitHub and its [CI run passed](https://github.com/hsun3163/ImpactLens/actions/runs/40104610755). See [delivery evidence](docs/DELIVERY.md) for exact revisions, passed checks, and limits. Historical v1 results apply only to the former static application.
+**Version status:** the SMS module was deployed as Sites publication revision 6 on October 24, 2026 at hosting source `0be5d80e82c5daff50a31d0ac8bfdd92a537d457`. Provider credentials, the shared Twilio number and TPW administrator allowlist still need authorized configuration; real SMS delivery and the hosted one-second two-display target are not yet verified. The earlier v2 aggregate backend remains in place, with publication-revision-4 browser and CI evidence preserved in [delivery evidence](docs/DELIVERY.md). Historical backend results do not establish SMS acceptance.
+
+## TPW SMS operations demo
+
+A separate SMS-only activity module adds a shared inbound number, organization/program/teacher-phone maintenance, private live organization and TPW dashboards, and deterministic transactional totals. Teachers text `20 2` for 20 participant visits and 2 session hours. No LLM or outbound acknowledgment SMS is used. Teacher contact data/raw messages are private to explicitly configured TPW administrators and never enter the CDCR evidence dataset.
+
+Use `/sms`, `/sms/admin`, and `/sms/org/<organization UUID>` for live operations; `/sms/demo` is an explicitly synthetic, browser-local rehearsal. Live provider receipt requires authorized Twilio-number/runtime-secret configuration; installing or deploying the code alone does not establish real SMS delivery. See [SMS demo setup, schema, security and acceptance](docs/SMS_DEMO.md). The organization display is admin-filtered, not a separate organization login.
+
 
 ## What v2 adds
 

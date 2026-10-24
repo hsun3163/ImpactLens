@@ -2,11 +2,22 @@
 
 The v1 static application was verified on 24 October 2026. This is an independent Hack for Social Impact prototype, ready for discussion and refinement with TPW. It is not an official CDCR or TPW product.
 
-## v2 backend architecture: publication revision 4
+## SMS module: publication revision 6
+
+- Public application: https://impactlens.inacra.chatgpt.site
+- Sites publication revision 6 succeeded on **2026-10-24 at 20:13 UTC**, using hosting source `0be5d80e82c5daff50a31d0ac8bfdd92a537d457`.
+- The source mirror contains the SMS schema, append-only migrations 0001/0002, signed inbound webhook, private TPW/organization displays, maintenance form, tests and operational documentation. Migration 0000 and the existing aggregate-data features are preserved.
+- Local verification passed: typechecking, **52 unit/security tests**, **23 independent real-local-D1 checks**, **12 built-Worker runtime checks**, official-data validation and the production Worker build. The exact scope and limits are in [SMS_VALIDATION.md](SMS_VALIDATION.md).
+- The runtime still needs authorized provider/number and TPW-admin configuration. **No real carrier→webhook→two-displays acceptance or hosted one-second latency result is claimed.** The public `/sms/demo` route is synthetic and browser-local; it is not a substitute for live delivery.
+- This publication identifier is separate from the GitHub source history. Inspect the Actions run for the exact GitHub commit containing this section; earlier backend runs below do not validate the SMS source.
+
+See [SMS_DEMO.md](SMS_DEMO.md) for setup, acceptance steps and privacy boundaries. Organization pages currently use the same TPW-admin access boundary; they are filtered displays, not separate organization-staff accounts.
+
+## Historical v2 backend architecture: publication revision 4
 
 The v2 architecture replaces the static export with a Sites/Vinext Cloudflare Worker, trusted-header ChatGPT authentication, owner-scoped aggregate projects in D1/R2, server-side validation/statistics, and stored reports. Browser import remains local until the user explicitly chooses to save. Architecture versions and hosting publication numbers are distinct: revisions 3 and 4 both use the v2 backend architecture.
 
-### Current publication and source
+### Publication revision 4 and source
 
 - Public application: https://impactlens.inacra.chatgpt.site
 - Sites publication revision 4 succeeded on **2026-10-24 at 14:53:48 UTC**.
