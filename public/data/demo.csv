@@ -1,0 +1,7 @@
+id,releaseYear,groupType,group,denominator,events,outcome,followupMonths,sourceId,sourcePage,dataKind,program,missingOutcomes
+synthetic-2021-22-Pathways,2021-22,fictional_program,Example Pathways,120,32,conviction,12,synthetic-demo,Generated fixture; not a real organization,synthetic,Example Pathways,10
+synthetic-2021-22-Community,2021-22,fictional_program,Example Community,120,44,conviction,12,synthetic-demo,Generated fixture; not a real organization,synthetic,Example Community,10
+synthetic-2022-23-Pathways,2022-23,fictional_program,Example Pathways,150,35,conviction,12,synthetic-demo,Generated fixture; not a real organization,synthetic,Example Pathways,10
+synthetic-2022-23-Community,2022-23,fictional_program,Example Community,150,48,conviction,12,synthetic-demo,Generated fixture; not a real organization,synthetic,Example Community,10
+synthetic-2023-24-Pathways,2023-24,fictional_program,Example Pathways,140,31,conviction,12,synthetic-demo,Generated fixture; not a real organization,synthetic,Example Pathways,10
+synthetic-2023-24-Community,2023-24,fictional_program,Example Community,140,42,conviction,12,synthetic-demo,Generated fixture; not a real organization,synthetic,Example Community,10

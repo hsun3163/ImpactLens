@@ -1,0 +1,230 @@
+[
+  {
+    "rowId": "2002-03-overall-all-releases-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 62,
+    "rawLine": "2002-03        99,482   19,643   19.7%     36,087  36.3%     47,443  47.7%"
+  },
+  {
+    "rowId": "2003-04-overall-all-releases-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 62,
+    "rawLine": "2003-04        99,635   21,509   21.6%     37,881  38.0%     48,350  48.5%"
+  },
+  {
+    "rowId": "2004-05-overall-all-releases-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 62,
+    "rawLine": "2004-05      103,647    23,464   22.6%     40,022  38.6%     51,026  49.2%"
+  },
+  {
+    "rowId": "2005-06-overall-all-releases-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 62,
+    "rawLine": "2005-06      105,974    23,428   22.1%     40,635  38.3%     51,650  48.7%"
+  },
+  {
+    "rowId": "2006-07-overall-all-releases-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 62,
+    "rawLine": "2006-07      112,665    26,657   23.7%     46,106  40.9%     57,980  51.5%"
+  },
+  {
+    "rowId": "2007-08-overall-all-releases-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 62,
+    "rawLine": "2007-08      113,888    25,233   22.2%     44,164  38.8%     56,525  49.6%"
+  },
+  {
+    "rowId": "2008-09-overall-all-releases-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 62,
+    "rawLine": "2008-09      110,356    23,831   21.6%     42,181  38.2%     54,175  49.1%"
+  },
+  {
+    "rowId": "2009-10-overall-all-releases-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 62,
+    "rawLine": "2009-10      103,867    22,410   21.6%     39,908  38.4%     51,456  49.5%"
+  },
+  {
+    "rowId": "2010-11-overall-all-releases-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 62,
+    "rawLine": "2010-11        94,888   20,403   21.5%     37,710  39.7%     48,689  51.3%"
+  },
+  {
+    "rowId": "2011-12-overall-all-releases-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 62,
+    "rawLine": "2011-12        74,875   18,894   25.2%     32,746  43.7%     40,644  54.3%"
+  },
+  {
+    "rowId": "2012-13-overall-all-releases-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 62,
+    "rawLine": "2012-13        35,790    7,363   20.6%     13,423  37.5%     16,496  46.1%"
+  },
+  {
+    "rowId": "2013-14-overall-all-releases-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 62,
+    "rawLine": "2013-14        33,113    6,990   21.1%     12,295  37.1%     15,264  46.1%"
+  },
+  {
+    "rowId": "2014-15-overall-all-releases-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 62,
+    "rawLine": "2014-15        39,205    8,003   20.4%     14,355  36.6%     18,235  46.5%"
+  },
+  {
+    "rowId": "2015-16-overall-all-releases-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 62,
+    "rawLine": "2015-16        33,756    6,312   18.7%     11,743  34.8%     15,059  44.6%"
+  },
+  {
+    "rowId": "2016-17-overall-all-releases-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 62,
+    "rawLine": "2016-17        31,792    6,710   21.1%     12,141  38.2%     15,123  47.6%"
+  },
+  {
+    "rowId": "2017-18-overall-all-releases-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 62,
+    "rawLine": "2017-18        35,447    7,719   21.8%     13,519  38.1%     15,804  44.6%"
+  },
+  {
+    "rowId": "2018-19-overall-all-releases-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 62,
+    "rawLine": "2018-19        36,086    7,633   21.2%     11,800  32.7%     15,129  41.9%"
+  },
+  {
+    "rowId": "2019-20-overall-all-releases-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 62,
+    "rawLine": "2019-20        34,215    4,676   13.7%      9,874  28.9%     13,395  39.1%"
+  },
+  {
+    "rowId": "2020-21-overall-all-releases-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 62,
+    "rawLine": "2020-21        30,116    4,197   13.9%      8,988  29.8%     11,886  39.5%"
+  },
+  {
+    "rowId": "2020-21-enhanced-credit-no-enhanced-credits-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 38,
+    "rawLine": "No                          15,087                2,629                17.4%                5,331                35.3%                6,875                45.6%"
+  },
+  {
+    "rowId": "2020-21-enhanced-credit-earned-enhanced-credits-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 38,
+    "rawLine": "Yes                         15,029                1,568                10.4%                3,657                24.3%                5,011                33.3%"
+  },
+  {
+    "rowId": "2020-21-supervision-post-release-community-supervision-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 15,
+    "rawLine": "Post-Release Community Supervision         13,611        2,495      18.3%           5,138      37.7%            6,660       48.9%"
+  },
+  {
+    "rowId": "2020-21-supervision-parole-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 15,
+    "rawLine": "Parole                                     16,471        1,699      10.3%           3,845      23.3%            5,220       31.7%"
+  },
+  {
+    "rowId": "2020-21-supervision-directly-discharged-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 15,
+    "rawLine": "Directly Discharged                            34            3       8.8%               5      14.7%                6       17.6%"
+  },
+  {
+    "rowId": "2020-21-gender-male-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 42,
+    "rawLine": "Male                                               28,040        93.1%          3,967      14.1%        8,485        30.3%       11,192        39.9%"
+  },
+  {
+    "rowId": "2020-21-gender-female-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 42,
+    "rawLine": "Female                                              2,076         6.9%            230      11.1%          503        24.2%          694        33.4%"
+  },
+  {
+    "rowId": "2020-21-age-18-and-19-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 42,
+    "rawLine": "18 and 19                                              75         0.2%            13       17.3%           30        40.0%           39        52.0%"
+  },
+  {
+    "rowId": "2020-21-age-20-to-24-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 42,
+    "rawLine": "20 to 24                                            2,657         8.8%           589       22.2%        1,169        44.0%        1,451        54.6%"
+  },
+  {
+    "rowId": "2020-21-age-25-to-29-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 42,
+    "rawLine": "25 to 29                                            5,307        17.6%           953       18.0%        2,008        37.8%        2,601        49.0%"
+  },
+  {
+    "rowId": "2020-21-age-30-to-34-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 42,
+    "rawLine": "30 to 34                                            5,881        19.5%           965       16.4%        2,031        34.5%        2,676        45.5%"
+  },
+  {
+    "rowId": "2020-21-age-35-to-39-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 42,
+    "rawLine": "35 to 39                                            4,890        16.2%           701       14.3%        1,504        30.8%        2,010        41.1%"
+  },
+  {
+    "rowId": "2020-21-age-40-to-44-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 42,
+    "rawLine": "40 to 44                                            3,800        12.6%           427       11.2%          999        26.3%        1,351        35.6%"
+  },
+  {
+    "rowId": "2020-21-age-45-to-49-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 42,
+    "rawLine": "45 to 49                                            2,417         8.0%           236        9.8%          497        20.6%          702        29.0%"
+  },
+  {
+    "rowId": "2020-21-age-50-to-54-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 42,
+    "rawLine": "50 to 54                                            1,945         6.5%           161        8.3%          392        20.2%          536        27.6%"
+  },
+  {
+    "rowId": "2020-21-age-55-to-59-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 42,
+    "rawLine": "55 to 59                                            1,540         5.1%            94        6.1%          218        14.2%          316        20.5%"
+  },
+  {
+    "rowId": "2020-21-age-60-and-over-conviction-36",
+    "sourceId": "cdcr-statewide-2020-21",
+    "pdfPage": 42,
+    "rawLine": "60 and over                                         1,604         5.3%            58        3.6%          140         8.7%          204        12.7%"
+  },
+  {
+    "rowId": "2020-21-program-mcrp-conviction-36",
+    "sourceId": "cdcr-eacp-2020-21",
+    "pdfPage": 3,
+    "rawLine": "Conviction                     804        247                30.7%         307         50        16.3%"
+  },
+  {
+    "rowId": "2020-21-program-fcrp-conviction-36",
+    "sourceId": "cdcr-eacp-2020-21",
+    "pdfPage": 3,
+    "rawLine": "Conviction                     804        247                30.7%         307         50        16.3%"
+  }
+]

@@ -1,0 +1,11 @@
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+.env*
+!.env.example
+
+# Public source documents are reproducibly downloaded and checksum-verified.
+research/*.pdf
+research/*.png
+research/*.txt

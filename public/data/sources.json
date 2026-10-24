@@ -1,0 +1,34 @@
+[
+  {
+    "id": "cdcr-statewide-2020-21",
+    "title": "Statewide Recidivism Report for Individuals Released in Fiscal Year 2020-21",
+    "publisher": "California Department of Corrections and Rehabilitation, Office of Research",
+    "publicationDate": "2026-06",
+    "url": "https://www.cdcr.ca.gov/research/wp-content/uploads/sites/174/2026/06/Statewide-Recidivism-Report-for-Individuals-Released-in-Fiscal-Year-2020-21.pdf",
+    "rawFile": "research/statewide_2020_21.pdf",
+    "accessDate": "2026-10-24",
+    "tables": [
+      "Table 15, printed p52 / PDF p62",
+      "Table 9, printed p28 / PDF p38",
+      "Table 2, printed p5 / PDF p15",
+      "Table 11, printed p32 / PDF p42",
+      "Table 1, printed p3 / PDF p13"
+    ],
+    "sha256": "5097d327e20a04ec259efbeb2ff2351e8324016efb1754a08caa4416b952227b",
+    "bytes": 1854591
+  },
+  {
+    "id": "cdcr-eacp-2020-21",
+    "title": "Supplemental Recidivism Rates for Enhanced Alternative Custody Program Participants Released in Fiscal Year 2020-21",
+    "publisher": "California Department of Corrections and Rehabilitation, Office of Research",
+    "publicationDate": "2026-09 (URL directory)",
+    "url": "https://www.cdcr.ca.gov/research/wp-content/uploads/sites/174/2026/09/Recidivism-Rates-for-EACP-Participants-FY-2020-21.pdf",
+    "rawFile": "research/eacp_2020_21.pdf",
+    "accessDate": "2026-10-24",
+    "tables": [
+      "Table 1, printed p3 / PDF p3"
+    ],
+    "sha256": "5a0ba62089edf9e013f818daea1f73d3e475b4bd8bef9e672af0550191dbb2fc",
+    "bytes": 431233
+  }
+]

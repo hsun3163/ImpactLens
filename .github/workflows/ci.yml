@@ -1,0 +1,38 @@
+name: Validate and build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install PDF extraction dependency
+        run: sudo apt-get update && sudo apt-get install --yes poppler-utils
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Restore checksum-verified official PDFs
+        run: python3 research/download_sources.py
+      - name: Unit tests
+        run: npm test
+      - name: Independently verify source data
+        run: npm run validate:data
+      - name: Check canonical data reproducibility
+        run: |
+          python3 research/extract_cdcr.py
+          python3 scripts/prepare_public_data.py
+          git diff --exit-code -- data public/data
+      - name: Build static site
+        run: npm run build
