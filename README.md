@@ -12,7 +12,7 @@ https://impactlens.inacra.chatgpt.site
 
 Public demonstration URL. Source: https://github.com/hsun3163/ImpactLens
 
-**Version status:** the v2 backend was deployed as Sites publication revision 3 on October 24, 2026. Authenticated save/reopen, server analysis, and stored report downloads have been browser-tested. An imported-synthetic-label correction is awaiting revision 4 verification; GitHub synchronization/new CI are not yet verified. See [delivery evidence](docs/DELIVERY.md) for the exact source revision, passed checks, and limits. Historical v1 results apply only to the former static application.
+**Version status:** the v2 backend is live as Sites publication revision 4, deployed October 24, 2026. Authenticated save/reopen, server analysis, and stored report downloads have been browser-tested, including synthetic-label preservation through imported CSV reports. The backend source is pushed to GitHub and its [CI run passed](https://github.com/hsun3163/ImpactLens/actions/runs/40104610755). See [delivery evidence](docs/DELIVERY.md) for exact revisions, passed checks, and limits. Historical v1 results apply only to the former static application.
 
 ## What v2 adds
 
@@ -71,7 +71,7 @@ Tests run with `node --import tsx --test tests/*.test.ts`, including backend sec
 4. Open **Sources & methods** and follow the original report. Use the source ID and page/table evidence to verify the numerator, denominator, and cohort definition.
 5. In **Upload data**, download the synthetic example CSV, import it, and inspect its explicit synthetic warning. CSV imports remain user-supplied, not verified official evidence. Try an invalid count or forbidden identifier column to demonstrate rejection. Use only public or authorized, non-identifying aggregate data.
 6. Run **Workflow**, inspect each stage, and download its JSON artifact. These are deterministic outputs, not transcripts of autonomous runtime agents.
-7. To exercise persistence, sign in, select **Save dataset**, name the project, confirm its aggregate-only scope, and select **Save aggregate dataset**. In **Saved projects**, reopen it after a reload, then run server analysis or **Generate & save report**. Stored reports use all saved rows, not current dashboard filters; **Export brief** remains browser-local and filtered. These operations were exercised against publication revision 3; see the delivery record for the separate uploaded-synthetic-label regression still pending.
+7. To exercise persistence, sign in, select **Save dataset**, name the project, confirm its aggregate-only scope, and select **Save aggregate dataset**. In **Saved projects**, reopen it after a reload, then run server analysis or **Generate & save report**. Stored reports use all saved rows, not current dashboard filters; **Export brief** remains browser-local and filtered. These operations were exercised against publication revision 3; v4 preserves explicit synthetic labels on import and keeps prior stored projects/reports intact. The final v4 imported-CSV save/report regression also passed; see the delivery record for exact scope.
 
 ## Evidence baseline
 
@@ -129,4 +129,4 @@ A changed upstream PDF fails the downloader's hash check rather than silently re
 - [Development roles and deterministic workflow](docs/AGENT_WORKFLOW.md)
 - [Evaluation roadmap](docs/EVALUATION_ROADMAP.md)
 
-The roadmap describes future, governed evaluation work, not capabilities conferred by adding a database. See [delivery evidence](docs/DELIVERY.md), [independent data validation](docs/VALIDATION.md), and [browser verification](docs/UI_VALIDATION.md). Historical v1 evidence is explicitly separated from verified v2 publication revision 3 checks and remaining revision 4/GitHub CI work. The Actions badge reflects repository checks, not a guarantee of hosted authentication, persistence, or security.
+The roadmap describes future, governed evaluation work, not capabilities conferred by adding a database. See [delivery evidence](docs/DELIVERY.md), [independent data validation](docs/VALIDATION.md), and [browser verification](docs/UI_VALIDATION.md). Historical v1 evidence is explicitly separated from v2 publication revisions 3/4 checks and any remaining verification work. The Actions badge reflects repository checks, not a guarantee of hosted authentication, persistence, or security.

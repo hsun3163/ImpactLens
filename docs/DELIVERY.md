@@ -2,37 +2,46 @@
 
 The v1 static application was verified on 24 October 2026. This is an independent Hack for Social Impact prototype, ready for discussion and refinement with TPW. It is not an official CDCR or TPW product.
 
-## v2 backend architecture: verified publication revision 3
+## v2 backend architecture: publication revision 4
 
-The v2 architecture replaces the static export with a Sites/Vinext Cloudflare Worker, trusted-header ChatGPT authentication, owner-scoped aggregate projects in D1/R2, server-side validation/statistics, and stored reports. Browser import remains local until the user explicitly chooses to save. Architecture versions and hosting publication revision numbers are different: publication revision 3 is the first deployed v2 backend recorded here.
+The v2 architecture replaces the static export with a Sites/Vinext Cloudflare Worker, trusted-header ChatGPT authentication, owner-scoped aggregate projects in D1/R2, server-side validation/statistics, and stored reports. Browser import remains local until the user explicitly chooses to save. Architecture versions and hosting publication numbers are distinct: revisions 3 and 4 both use the v2 backend architecture.
 
-### Publication and source
+### Current publication and source
 
 - Public application: https://impactlens.inacra.chatgpt.site
-- Sites publication revision 3 succeeded on **2026-10-24 at 14:27:39 UTC**.
-- Hosting source commit: `a3bebddec24e503601e2502ed1f7464731fc6d61`.
+- Sites publication revision 4 succeeded on **2026-10-24 at 14:53:48 UTC**.
+- Hosting source commit: `156269a539eeb778b45aa7e96bae47ec70fdc992`.
 - GitHub repository: https://github.com/hsun3163/ImpactLens
-- GitHub synchronization and a hosted Actions run for the backend upgrade are **not yet verified**. The historical CI link below applies only to v1 and must not be presented as a passing v2 run.
+- Backend source pushed to GitHub: `500da191720ac0224f504d6d894856e385f741e2`; the branch update was confirmed.
+- Hosted backend CI: https://github.com/hsun3163/ImpactLens/actions/runs/40104610755. **All jobs and steps passed** for exact head `500da191720ac0224f504d6d894856e385f741e2`, verified at **14:55:57 UTC**. This includes locked dependency installation, typechecking, tests, checksum-verified PDF restoration, independent source-data validation, canonical-data regeneration/drift checks, Worker build, and deployment-artifact checks.
 
-### Executed checks
+The repository and hosting mirror use distinct commit histories. The hosting commit above identifies the published artifact; the GitHub commit identifies the pushed backend source. A later documentation-only commit is separate from either implementation identifier.
 
-- **37 automated tests passed** for the v3 implementation, covering the retained statistical/CSV/data checks and backend security behavior.
+### Publication revision 4 checks
+
+- **Typechecking, all 38 automated tests, and the Worker production build passed.** The added regression preserves explicit synthetic labels through browser parsing, save serialization, D1 reopening, server analysis, and all three report formats. Supplied official claims still become uploaded, never verified official evidence.
+- **All 11 live anonymous/security checks passed again** after v4 publication, including private-route rejection and stripping of caller-forged identity headers at the hosted gateway.
+- Existing saved projects reopen after the upgrade, and previously stored reports remain byte-identical. The upgrade does not rewrite old project/report records.
+- The final authenticated cloud-browser regression **passed at 14:55 UTC**: import the demo CSV → explicitly save → reload/reopen → run server analysis → generate a stored report → download JSON, CSV, and Markdown. Inspected JSON/CSV retain all six synthetic rows and correct counts/rates; JSON row warnings and the Markdown `SYNTHETIC DATA` warning are present. This verifies the stored artifacts, not merely the import banner.
+
+### Broader backend and browser checks from publication revision 3
+
+Publication revision 3 succeeded at **14:27:39 UTC** on 2026-10-24 with hosting source `a3bebddec24e503601e2502ed1f7464731fc6d61`.
+
+- Its automated suite passed 37 tests before the v4 regression was added.
 - **13 actual local runtime checks passed** against the built Worker with local D1 and R2, not only mocks. They cover authenticated creation, reloading saved rows, server rates/Wilson intervals, report history, three persisted report formats, anonymous rejection, cross-origin rejection, and other-user denial. D1 records and all three R2 artifacts survived a complete Worker process restart. The initial pass was recorded at 14:26:18 UTC and restart verification at 14:28:01 UTC.
-- **11 live anonymous/security checks passed** against the deployed site, including rejection of private access and stripping of caller-forged identity headers by the hosted gateway.
-- The deployed canonical public dataset matches all **38 official aggregate rows**.
-- **Authenticated cloud-browser checks passed:** explicit save, reload/reopen, server analysis, report generation, report-history refresh, and actual JSON/CSV/Markdown downloads. Downloaded files contain the expected six synthetic rows, correct counts/rates, and synthetic labels for the built-in Demo snapshot.
+- **11 live anonymous/security checks passed**, and the deployed canonical public dataset matched all **38 official aggregate rows**.
+- **Authenticated cloud-browser checks passed:** explicit save, reload/reopen, server analysis, report generation, report-history refresh, and actual JSON/CSV/Markdown downloads. Inspected downloads contained the six expected synthetic rows and correct counts/rates when saving the built-in Demo dataset.
 - Sign-out restored private-endpoint denial while public exploration continued to work; signing in again succeeded.
-- Desktop layout was checked at a **1,173-pixel viewport**, with no horizontal overflow observed. Mobile viewport testing was unavailable in this pass and is not claimed.
+- Desktop layout was checked at a **1,173-pixel viewport**, with no horizontal overflow observed. Mobile viewport testing was unavailable and is not claimed.
 
-These are layered checks, not a security certification. Synthetic identities establish cross-owner application behavior locally; no two-account hosted isolation test is claimed. See [UI_VALIDATION.md](UI_VALIDATION.md) and [BACKEND.md](BACKEND.md) for scope and remaining limitations.
+These are layered checks, not a security certification. Synthetic identities establish cross-owner application behavior locally; no two-account hosted isolation test is claimed. See [UI_VALIDATION.md](UI_VALIDATION.md) and [BACKEND.md](BACKEND.md) for scope and limitations.
 
-### Follow-up revision and remaining verification
+### Verification and operational limits
 
-Browser QA found that importing a CSV containing an explicit synthetic label could downgrade that label to uploaded, although saving the built-in Demo preserved synthetic labels correctly. A corrective publication revision 4 is being prepared. Its exact source commit, publication result, final test count, and uploaded-synthetic-label regression are **pending**; v3 results above are not a claim that the fix is deployed or verified.
+The deployed v4 implementation, final imported-synthetic-report regression, and linked backend CI run are verified above. A subsequent documentation-only commit requires its own GitHub CI result; the passing run cited here is tied to its exact backend-source head. These results do not imply a full security, accessibility, or production-readiness audit.
 
-The GitHub push and new hosted CI result also remain pending. Dependency installation, final source regeneration, and final build results should be attached to the final revision rather than inferred from a prior run or an Actions badge.
-
-The v2 privacy boundary differs materially from v1: explicitly saved aggregates persist in cloud storage and do not disappear at logout. No self-service deletion, retention guarantee, team sharing, or regulated-data certification is provided.
+The v2 privacy boundary differs materially from v1: explicitly saved aggregates persist in cloud storage and do not disappear at logout. No self-service deletion, retention guarantee, team sharing, or regulated-data certification is provided. Already stored records are not retroactively relabeled by the synthetic-import fix.
 
 ## Historical v1 access and source
 

@@ -1,8 +1,20 @@
 # UI validation record
 
-## v2 backend: deployed browser verification, publication revision 3
+## v2 backend: publication revision 4 regression checks
 
-Checked on 2026-10-24 against https://impactlens.inacra.chatgpt.site after publication at **14:27:39 UTC**, hosting source commit `a3bebddec24e503601e2502ed1f7464731fc6d61`. Checks used the cloud browser. This is evidence for the v2 backend architecture, distinct from the historical v1 static-site checks below.
+Sites publication revision 4 succeeded on **2026-10-24 at 14:53:48 UTC** at https://impactlens.inacra.chatgpt.site, using hosting source `156269a539eeb778b45aa7e96bae47ec70fdc992`. The checks below used the cloud browser unless otherwise stated.
+
+- Previously saved projects reopened after the upgrade.
+- Existing stored report files remained byte-identical; the upgrade did not regenerate or rewrite them.
+- Importing a CSV carrying explicit synthetic labels now displays the synthetic warning.
+- Eleven live anonymous/security API checks passed again, including private-route denial and forged-identity stripping.
+- The final imported-synthetic-CSV regression **passed at 14:55 UTC**: import the demo CSV, explicitly save, reload/reopen, run server analysis, generate a stored report, and download JSON/CSV/Markdown. Inspection verified all six synthetic rows, correct counts/rates, retained synthetic labels in JSON/CSV, JSON row warnings, and the Markdown `SYNTHETIC DATA` warning. This result is based on the actual saved artifacts, not only the visible import banner.
+
+The v4 automated suite passes 38 tests, including an import-to-save-to-report synthetic-label regression, and typechecking/build pass. Automated coverage is recorded separately from the hosted browser observations above.
+
+## v2 backend: broader browser pass, publication revision 3
+
+Checked on 2026-10-24 after publication at **14:27:39 UTC**, hosting source `a3bebddec24e503601e2502ed1f7464731fc6d61`. This is evidence for the v2 backend architecture, distinct from the historical v1 static-site checks below.
 
 ### Authenticated browser flows passed
 
@@ -16,19 +28,19 @@ Checked on 2026-10-24 against https://impactlens.inacra.chatgpt.site after publi
 
 ### Separate API/runtime evidence
 
-- Eleven live anonymous/security checks passed, including private-route rejection and stripping of forged identity headers at the deployed authentication gateway. Public canonical data matches the 38-row evidence baseline.
+- Eleven live anonymous/security checks passed, including private-route rejection and stripping of forged identity headers at the deployed authentication gateway. Public canonical data matched the 38-row evidence baseline.
 - Thirteen checks against the actual locally built Worker with D1/R2 passed, including owner isolation, cross-origin mutation rejection, server analysis, report/history storage, all three artifact formats, and persistence through a full Worker process restart.
 - These local owner-isolation tests used synthetic identities. They are not evidence of a two-account hosted browser test.
 
-### Finding requiring publication revision 4
+### Synthetic-label issue and correction
 
-The built-in Demo snapshot retained synthetic labels, but importing a CSV containing explicit synthetic labels could relabel it as uploaded. The correction is in progress. The final source revision, publication, test rerun, and browser regression for this imported-CSV path remain pending. Do not describe the v3 pass as verification of that later fix.
+v3 preserved labels when saving the built-in Demo but could relabel an imported synthetic CSV as uploaded. v4 preserves explicit synthetic warnings in the shared browser/server parser and removes the frontend overwrite; official source claims still become unverified uploaded data. No migration rewrites previously stored records. The v4 browser follow-up is recorded at the top of this document rather than retroactively changing the v3 pass.
 
 ### Verification limits
 
 Mobile viewport testing was unavailable, so this pass does not establish mobile/physical-device behavior. No two-account hosted isolation test or full browser accessibility audit is claimed. Unit/local checks for invalid input, quota limits, and request controls are not a substitute for exercising every failure and interrupted/repeated-action path in the hosted browser.
 
-The following entries preserve historical v1 observations, including an initial blocked attempt and later successful deployed checks. Their timestamps, static-build details, and old test counts do not override this v2 record.
+The following entries preserve historical v1 observations, including an initial blocked attempt and later successful deployed checks. Their timestamps, static-build details, and old test counts do not override the v2 record.
 
 ## Historical v1 verification
 
