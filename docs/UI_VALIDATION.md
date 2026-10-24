@@ -38,3 +38,38 @@ Source-review findings were sent to implementation owner: reconcile follow-up se
 ## Production access check
 
 The deployed owner-private URL `https://impactlens.inacra.chatgpt.site/` was opened through cloud-browser CUA. It served the expected private access gate (title `Sign in required`, heading `Log in to access`) rather than application content. Selecting `Continue with ChatGPT` led to the official `https://auth.openai.com/log-in` page. This browser has no existing authenticated session. The sign-in form currently offers an email-identifier step and Google, Apple, Microsoft, or phone sign-in. No credentials were entered, no access restrictions were bypassed, and sharing was not changed. Application UI interactions, mobile rendering, uploads and downloads remain unverified in the browser pending authentication.
+
+## Public production UI pass (2026-10-24, after authorized sharing change)
+
+The same deployed URL now serves the application publicly. The prior authentication blocker is resolved. All interactions below were executed through CUA on the deployed site, not inferred from source.
+
+- Default Overview: 2020-21 / overall / conviction / 36 months; 39.5%, 11,886 events / 30,116 people; Wilson interval 38.9–40.0%. Release selector exposes all 19 years.
+- Historical selection: choosing 2002-03 updates counts to 47,443 / 99,482 and 47.7%.
+- Compare cohorts: overall selection correctly requests a subgroup breakdown. Enhanced Credit shows no-credit 6,875 / 15,087 (45.6%) versus earned-credit 5,011 / 15,029 (33.3%), with correct +12.2 percentage-point A-minus-B gap and noncausal caveats.
+- Workflow: run produced all five artifacts; Ingest shows 38 official rows. Validate shows 38 valid rows, no errors, and actual missingness/free-text privacy warnings. Switching Demo resets every stage to not run. Rerun shows mode synthetic, 6 rows.
+- Demo labeling: visible `SYNTHETIC · Not real outcomes` and explicit not-real-people/program-results notice.
+- Sources & methods: both official CDCR source records, source IDs, tables/page references, original links, definitions, missingness and uncertainty limitations visible.
+- Upload: supported file chooser accepted checked-in `public/data/demo.csv`; UI showed 6 rows ready, filename, self-reported/unverified mode and browser-only notice. Fake synthetic identifier-header fixture was rejected with `Personal-identifier columns are forbidden: email`. Malformed fixture rejected with `Malformed CSV: unclosed quoted field.` Failed imports clear prior uploaded rows and disable Export brief.
+- Downloads: clicked CSV and Export brief, waited for actual completed downloads, then read files. CSV contains the exact latest row and all schema fields. Markdown contains count/rate, Wilson interval, source URL/page, missing 539, interpretation limits, selected CSV and no-live-AI statement. Copies: `/workspace/shared/impactlens-qa/official.csv`, `official-brief.md`.
+- Responsive check: resized the cloud Chromium window with documented native mouse drag to a 500-pixel content viewport. Filters and metric cards reflow; upload form becomes one column; navigation becomes hamburger. Open navigation then Overview worked. This is narrow-desktop responsive testing, not physical mobile/device emulation.
+- Screenshots outside source: `/workspace/shared/impactlens-qa/mobile-overview.png` and `/workspace/shared/impactlens-qa/desktop-overview.png` (full-page PNGs).
+
+A temporary `/tmp` fixture path was not visible to the browser file reader; placing synthetic fixtures in the shared workspace resolved the filesystem-boundary issue. This was not an application parser failure.
+
+Pending final revision regression: positive-integer follow-up rejection and outcome/window reconciliation fixes are being deployed by the owner.
+
+## Final revision regression
+
+Freshly reloaded deployed revision with source commit `cafed504ef061df0475deb1fff9fef42bfbac2e2` at 08:56 UTC:
+
+- Header now says `Browser-only uploads`.
+- Synthetic 1.5-month fixture rejected with `Row 2: followupMonths must be a positive safe integer.`
+- Synthetic two-outcome fixture imported successfully: conviction at 36 months displays 10/100 = 10.0%. Selecting rearrest automatically reconciles follow-up to 12 months and displays 20/100 = 20.0%, without the previous empty selection.
+- Downloaded final Markdown brief and inspected `Next evaluation steps`: cohort eligibility/definitions, missingness, baseline risk and participation measures, and governed adjusted evaluation. Saved `/workspace/shared/impactlens-qa/final-brief.md`.
+- Source register still renders the two exact official CDCR PDF links, source IDs and printed/PDF page references.
+- Saved final desktop screenshot: `/workspace/shared/impactlens-qa/final-desktop-overview.png`.
+- Latest independent unit run: 21 tests passed, 0 failed.
+
+Exact 390px/device emulation was not verified. The browser advertises no viewport capability, native window resizing bottoms out at approximately 500px, and opening DevTools showed an organization policy block. The restriction was respected, dismissed, and not bypassed. Responsive claims are limited to the actual approximately 500px narrow-browser check described above.
+
+Final result: core deployed browser interactions and both targeted regressions passed; no remaining observed core UI failure. Device-specific 390px testing remains a stated verification limit.

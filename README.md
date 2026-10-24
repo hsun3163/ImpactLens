@@ -1,5 +1,7 @@
 # ImpactLens
 
+[![Validate and build](https://github.com/hsun3163/ImpactLens/actions/workflows/ci.yml/badge.svg)](https://github.com/hsun3163/ImpactLens/actions/workflows/ci.yml)
+
 **A transparent, aggregate-only recidivism evidence dashboard.** Explore public California release-cohort outcomes, inspect the counts behind the percentages, and compare compatible cohorts without confusing association with program impact.
 
 ImpactLens is a hackathon prototype, not a causal evaluation system or a tool for individual risk scoring, eligibility, sentencing, or supervision decisions.
@@ -105,4 +107,4 @@ A changed upstream PDF fails the downloader's hash check rather than silently re
 - [Development roles and deterministic workflow](docs/AGENT_WORKFLOW.md)
 - [Evaluation roadmap](docs/EVALUATION_ROADMAP.md)
 
-The roadmap describes future, governed evaluation work, not implemented linkage or a promise of causal identification. The [GitHub repository](https://github.com/hsun3163/ImpactLens) has been created. The code is prepared for static deployment; remote CI results and a hosted deployment must be verified separately. No passing hosted CI run or live deployment is asserted by this README.
+The roadmap describes future, governed evaluation work. The public application is deployed and browser-tested; source, tests, provenance and CI are in this repository. See [delivery evidence](docs/DELIVERY.md), [independent data validation](docs/VALIDATION.md), and [browser verification](docs/UI_VALIDATION.md). The Actions badge reflects current repository checks.
