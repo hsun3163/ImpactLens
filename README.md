@@ -4,6 +4,12 @@
 
 ImpactLens is a hackathon prototype, not a causal evaluation system or a tool for individual risk scoring, eligibility, sentencing, or supervision decisions.
 
+## Live application
+
+https://impactlens.inacra.chatgpt.site
+
+Public demo with browser-local CSV processing. Source: https://github.com/hsun3163/ImpactLens
+
 ## What is implemented
 
 - Next.js 16 static-export application with React, TypeScript, and Recharts.

@@ -17,12 +17,12 @@ for row in raw:
 (P/'sources.json').write_text((R/'data/sources.json').read_text())
 (P/'data_dictionary.md').write_text((R/'data/data_dictionary.md').read_text())
 with (P/'official.csv').open('w',newline='') as f:
- w=csv.DictWriter(f,fieldnames=fields+['missingOutcomes']);w.writeheader();w.writerows(rows)
+ w=csv.DictWriter(f,lineterminator='\n',fieldnames=fields+['missingOutcomes']);w.writeheader();w.writerows(rows)
 demo=[]
 for year,n,a,b in [('2021-22',120,32,44),('2022-23',150,35,48),('2023-24',140,31,42)]:
  for program,k in [('Example Pathways',a),('Example Community',b)]:
   demo.append(dict(id=f"synthetic-{year}-{program.split()[-1]}",releaseYear=year,groupType='fictional_program',group=program,denominator=n,events=k,outcome='conviction',followupMonths=12,sourceId='synthetic-demo',sourcePage='Generated fixture; not a real organization',dataKind='synthetic',program=program,missingOutcomes=10))
 (P/'demo.json').write_text(json.dumps(demo,indent=2)+'\n')
 with (P/'demo.csv').open('w',newline='') as f:
- w=csv.DictWriter(f,fieldnames=fields+['program','missingOutcomes']);w.writeheader();w.writerows(demo)
+ w=csv.DictWriter(f,lineterminator='\n',fieldnames=fields+['program','missingOutcomes']);w.writeheader();w.writerows(demo)
 print(f'Prepared {len(rows)} official rows and {len(demo)} labeled synthetic rows.')

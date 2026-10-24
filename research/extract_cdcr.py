@@ -64,5 +64,5 @@ assert sum(x['events'] for x in rows if x['groupType']=='enhanced_credit')==1188
 for name,obj in [('official_cdcr.json',rows),('sources.json',SOURCES),('extraction_evidence.json',evidence)]:
  (D/name).write_text(json.dumps(obj,indent=2)+'\n')
 with (D/'official_cdcr.csv').open('w',newline='') as f:
- w=csv.DictWriter(f,fieldnames=list(rows[0]));w.writeheader();w.writerows(rows)
+ w=csv.DictWriter(f,lineterminator='\n',fieldnames=list(rows[0]));w.writeheader();w.writerows(rows)
 print(f'Extracted and validated {len(rows)} official aggregate rows from {len(SOURCES)} archived PDFs.')
