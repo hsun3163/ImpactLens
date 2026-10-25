@@ -13,6 +13,7 @@ export default function SmsLayout({ children }: { children: React.ReactNode }) {
       <span className="sms-product-label">TPW CHECK-INS</span>
       <nav aria-label="SMS navigation">
         <a href="/sms">Live dashboards</a>
+        <a href="/sms/reports">Reports & summaries</a>
         <a href="/sms/admin">Manage check-ins</a>
         <a href="/sms/demo" className="sms-demo-link">Try the demo ↗</a>
       </nav>

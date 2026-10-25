@@ -1,4 +1,6 @@
 import { isE164, parseSms, verifyTwilioSignature } from '../lib/sms';
+import { handleSmsReport } from './sms-report-api';
+import { handleCourseSummaries } from './course-summary-api';
 
 export interface SmsRuntime {
   DB?: D1Database;
@@ -204,6 +206,8 @@ export async function handleSmsApi(request: Request, env: SmsRuntime): Promise<R
     }
     const userId = requireAdmin(request, env);
     if (!env.DB) throw new SmsError(503, 'STORAGE_UNAVAILABLE', 'SMS storage is unavailable.');
+    if (path === '/api/sms/summaries') { if (request.method === 'POST') requireOrigin(request); return await handleCourseSummaries(request, env.DB); }
+    if (path === '/api/sms/report' && request.method === 'GET') return await handleSmsReport(env.DB, url);
     if (path === '/api/sms/dashboard' && request.method === 'GET') return await dashboard(env.DB, url);
     if (path === '/api/sms/admin' && request.method === 'GET') return await adminData(env.DB, env);
     if (path === '/api/sms/admin' && request.method === 'POST') { requireOrigin(request); return await mutate(env.DB, await readJson(request), userId); }

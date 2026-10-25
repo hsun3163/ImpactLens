@@ -89,6 +89,7 @@ export default function SmsDemo() {
       </div><div className="sms-screen-footer"><ShieldCheck size={13}/> Repeat attendance counts as a new visit, not a unique person</div></section>
     </div>
     <div className="sms-demo-flow"><span><span>01</span> A teacher texts <b>20 2</b></span><ArrowRight size={17}/><span><span>02</span> Their phone identifies the program</span><ArrowRight size={17}/><span><span>03</span> Both dashboards update</span></div>
+    <section className="sms-report-invite"><div><span className="sms-kicker">THE NEXT CHAPTER</span><h2>Turn recorded activity into a story.</h2><p>Explore weekly trends and a one-page brief with a separate, clearly fictional sample.</p></div><a className="sms-button sms-primary" href="/sms/demo/reports">Try the reporting demo <ArrowUpRight size={15}/></a></section>
     <div className="sms-demo-bottom"><p><b>No model needed.</b> A fixed format, registered phone mappings, and arithmetic. {quarantined > 0 && `${quarantined} local test ${quarantined === 1 ? 'message is' : 'messages are'} quarantined and excluded from totals.`} Quarter-hour durations are accepted, from 0.25 to 24 hours. These are participation measures, not outcome or recidivism claims.</p><a className="sms-button sms-secondary" href="/sms">Open the real SMS workspace <ArrowUpRight size={15}/></a></div>
   </div>;
 }

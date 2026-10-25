@@ -16,6 +16,8 @@ These are self-reported activity counts, not unique participant counts, verified
 - `/sms` — TPW overall live display, accessible only to configured TPW administrators.
 - `/sms/org/<organization UUID>` — organization-filtered live display under the same TPW admin boundary.
 - `/sms/admin` — simple organization, program, phone-binding maintenance and private inbound ledger.
+- `/sms/reports` — administrator-only recorded-activity reports, funding brief, and separate course-summary review/save. See [reporting contract](REPORTING.md).
+- `/sms/demo/reports` — fixed-date, explicitly synthetic reporting example; no live requests or writes.
 - `/sms/demo` — explicitly synthetic, browser-memory rehearsal. It does not send SMS or write to the live database. Reloading resets it.
 - Add `?fast=1` to live display routes for presentation polling at 250 ms. Normal visible display polling is 1 second; hidden tabs back off. Polls do not overlap.
 
@@ -99,7 +101,7 @@ npm run build
 
 If the default npm cache is unavailable, use a writable cache, for example `npm_config_cache=/tmp/impactlens-npm-cache npm run install:ci`. The existing PDF hash-check tests require the archived public source PDFs; restore them using `python3 research/download_sources.py` when absent.
 
-Apply only unapplied migrations to a local database, in order. A fresh local database needs all three migrations:
+Apply only unapplied migrations to a local database, in order. A fresh local database needs all migrations, including the additive course-summary migration 0003:
 
 ```sh
 for migration in drizzle/[0-9]*.sql; do
@@ -109,7 +111,7 @@ for migration in drizzle/[0-9]*.sql; do
 done
 ```
 
-Existing local databases with migration 0000 already applied need migrations 0001 and 0002. Never rerun or modify the applied historical migration. Local secrets belong in ignored `.dev.vars`, with synthetic test values, never production credentials. Local emulated storage is separate from hosted data. Publish through the existing Sites workflow; Sites applies packaged pending migrations before uploading the Worker.
+Existing local databases need only their unapplied migrations; a database already at SMS migration 0002 needs only 0003 for course summaries. Never rerun or modify the applied historical migration. Local secrets belong in ignored `.dev.vars`, with synthetic test values, never production credentials. Local emulated storage is separate from hosted data. Publish through the existing Sites workflow; Sites applies packaged pending migrations before uploading the Worker.
 
 `tests/sms.test.ts` executes actual SQLite migrations and trigger SQL. It covers parser boundaries, canonical signatures including new fields, account/recipient/path checks, configuration failure, anonymous/non-admin/CSRF rejection, global/org counts, one-phone binding, immutable historical attribution, quarantine recovery, concurrent duplicates, no outbound reply, raw-data privacy, and transaction rollback/retry. Existing CDCR/security tests remain part of `npm test`.
 

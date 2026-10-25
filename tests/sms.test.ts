@@ -196,3 +196,44 @@ test('quarantine retry checks original snapshotted teacher even if phone is reus
     const processed = f.sqlite.prepare('SELECT * FROM sms_records').get() as any; assert.equal(processed.teacher_id, a.teacherId); assert.equal(processed.program_id, a.programId);
   } finally { f.sqlite.close(); }
 });
+
+test('activity reports enforce existing auth and expose only counted aggregate data', async () => {
+  const f = fixture(); try {
+    const m = await f.mapping(); await f.sms('20 2'); await f.sms('invalid');
+    assert.equal((await f.api('/api/sms/report', undefined, null)).status, 401); assert.equal((await f.api('/api/sms/report', undefined, 'not-admin')).status, 403);
+    const response = await f.api('/api/sms/report'); assert.equal(response.status, 200); assert.match(response.headers.get('cache-control')!, /no-store/);
+    const report = await response.json() as any; assert.equal(report.current.sessions, 1); assert.equal(report.current.attendees, 20); assert.equal(report.current.participantMinutes, 2400); assert.equal(report.current.averageAttendance, 20); assert.equal(report.coverage.completeness, 'unknown');
+    assert.doesNotMatch(JSON.stringify(report), /senderPhone|sender_phone|"body"|14155550101|messageSid|teacherId|reprocessedBy/);
+    const other = await f.mapping('+14155550102', 'Other');
+    assert.equal((await f.api(`/api/sms/report?organizationId=${m.organizationId}&programId=${other.programId}`)).status, 400);
+    assert.equal((await f.api('/api/sms/report?organizationId=11111111-1111-4111-8111-111111111111')).status, 400);
+    assert.equal((await f.api('/api/sms/report?start=2026-99-01')).status, 400);
+  } finally { f.sqlite.close(); }
+});
+test('report windows use original UTC receipt dates with inclusive end dates and equal prior periods', async () => {
+  const f = fixture(); try {
+    const a = await f.mapping(); const b = await f.mapping('+14155550102', 'Other'); let sequence = 0;
+    const insert = (date: string, attendees: number, m = a, status = 'counted') => f.sqlite.prepare(`INSERT INTO sms_records(id,message_sid,sender_phone,body,status,teacher_id,organization_id,program_id,organization_name,program_name,attendees,session_minutes,received_at,processed_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(crypto.randomUUID(), 'SM' + (++sequence).toString(16).padStart(32, '0'), PHONE, `${attendees} 2`, status, m.teacherId, m.organizationId, m.programId, 'Synthetic Org', 'Synthetic Program', attendees, 120, date, status === 'counted' ? '2021-01-01T00:00:00.000Z' : null);
+    insert('2020-09-30T23:59:59.999Z', 5); insert('2020-10-01T00:00:00.000Z', 20); insert('2020-10-14T23:59:59.999Z', 0); insert('2020-10-15T00:00:00.000Z', 99); insert('2020-10-05T12:00:00.000Z', 999, a, 'quarantined'); insert('2020-10-06T12:00:00.000Z', 10, b);
+    await f.api('/api/sms/admin', { action: 'program', id: a.programId, organizationId: a.organizationId, name: 'Renamed historical program', active: false });
+    const response = await f.api(`/api/sms/report?start=2020-10-01&end=2020-10-14&organizationId=${a.organizationId}&programId=${a.programId}`); assert.equal(response.status, 200);
+    const r = await response.json() as any;
+    assert.equal(r.current.sessions, 2); assert.equal(r.current.attendees, 20); assert.equal(r.current.sessionMinutes, 240); assert.equal(r.current.averageAttendance, 10); assert.equal(r.current.activeWeeks, 2);
+    assert.equal(r.previous.start, '2020-09-17'); assert.equal(r.previous.end, '2020-09-30'); assert.equal(r.previous.sessions, 1); assert.equal(r.previous.attendees, 5);
+    assert.equal(r.programActivity.length, 1); assert.equal(r.programActivity[0].name, 'Renamed historical program'); assert.equal(r.buckets.length, 3); assert.equal(r.buckets[1].sessions, 0);
+  } finally { f.sqlite.close(); }
+});
+
+test('course-summary integration shares admin and origin boundaries without SMS counter changes', async () => {
+  const f = fixture(); try {
+    const m = await f.mapping(); await f.sms();
+    const body = { id: crypto.randomUUID(), revision: 0, organizationId: m.organizationId, programId: m.programId, status: 'completed', participants: 20, completers: 15, courseHoursPerParticipant: 12 };
+    for (const path of ['/api/sms/summaries']) { assert.equal((await f.api(path, undefined, null)).status, 401); assert.equal((await f.api(path, undefined, 'other')).status, 403); assert.equal((await f.api(path, body, null)).status, 401); }
+    assert.equal((await f.api('/api/sms/summaries', body, 'tpw-admin', { origin: 'https://other.example' })).status, 403);
+    assert.equal((await f.api('/api/sms/summaries', body, 'tpw-admin', { 'sec-fetch-site': 'cross-site' })).status, 403);
+    assert.equal((await f.api('/api/sms/summaries', body)).status, 201); assert.equal((await f.api('/api/sms/summaries', body)).status, 200);
+    assert.deepEqual((await f.dash()).totals, { sessions: 1, attendees: 20, sessionMinutes: 120, participantMinutes: 2400 });
+    const report = await (await f.api('/api/sms/report')).json() as any; assert.equal(report.current.sessions, 1); assert.equal(report.current.attendees, 20);
+    const saved = await (await f.api('/api/sms/summaries')).json() as any; assert.equal(saved.summaries.length, 1); assert.equal(saved.summaries[0].completers, 15); assert.equal(saved.summaries[0].source, 'Manual course summary'); assert.doesNotMatch(JSON.stringify(saved), /senderPhone|sender_phone|14155550101|teacherId|reprocessedBy/);
+  } finally { f.sqlite.close(); }
+});

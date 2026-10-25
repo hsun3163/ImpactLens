@@ -1,4 +1,5 @@
-import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { sql } from 'drizzle-orm';
+import { check, index, integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 // Each row is one authenticated user's bounded aggregate-only dataset.
 // Never store identity-provider email/name or individual-person records.
@@ -53,3 +54,28 @@ export const smsAggregates = sqliteTable('sms_aggregates', {
   sessionMinutes: integer('session_minutes').notNull().default(0), participantMinutes: integer('participant_minutes').notNull().default(0),
   lastReceivedAt: text('last_received_at').notNull(),
 }, table => [index('sms_aggregates_org_idx').on(table.organizationId)]);
+
+
+// Existing TPW course-summary fields only. Manual values never update SMS counters.
+export const courseSummaries = sqliteTable('course_summaries', {
+  id: text('id').primaryKey(),
+  revision: integer('revision').notNull(),
+  organizationId: text('organization_id').notNull().references(() => smsOrganizations.id),
+  programId: text('program_id').notNull().references(() => smsPrograms.id),
+  facility: text('facility'), yard: text('yard'),
+  status: text('status', { enum: ['planned', 'in-progress', 'completed'] }).notNull(),
+  startDate: text('start_date'), endDate: text('end_date'),
+  courseHoursPerParticipant: real('course_hours_per_participant'),
+  participants: integer('participants'), completers: integer('completers'), notes: text('notes'),
+  createdAt: text('created_at').notNull(), updatedAt: text('updated_at').notNull(),
+}, table => [
+  index('course_summaries_updated_idx').on(table.updatedAt, table.id),
+  index('course_summaries_org_updated_idx').on(table.organizationId, table.updatedAt, table.id),
+  check('course_summary_revision', sql`${table.revision} >= 1 AND ${table.revision} <= 9007199254740991`),
+  check('course_summary_status', sql`${table.status} IN ('planned', 'in-progress', 'completed')`),
+  check('course_summary_participants', sql`${table.participants} IS NULL OR (typeof(${table.participants}) = 'integer' AND ${table.participants} BETWEEN 0 AND 1000000)`),
+  check('course_summary_completers', sql`${table.completers} IS NULL OR (typeof(${table.completers}) = 'integer' AND ${table.completers} BETWEEN 0 AND 1000000)`),
+  check('course_summary_completion_bound', sql`${table.participants} IS NULL OR ${table.completers} IS NULL OR ${table.completers} <= ${table.participants}`),
+  check('course_summary_hours', sql`${table.courseHoursPerParticipant} IS NULL OR ${table.courseHoursPerParticipant} BETWEEN 0 AND 1000000`),
+  check('course_summary_date_order', sql`${table.startDate} IS NULL OR ${table.endDate} IS NULL OR ${table.endDate} >= ${table.startDate}`),
+]);

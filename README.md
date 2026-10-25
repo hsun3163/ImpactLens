@@ -137,3 +137,7 @@ A changed upstream PDF fails the downloader's hash check rather than silently re
 - [Evaluation roadmap](docs/EVALUATION_ROADMAP.md)
 
 The roadmap describes future, governed evaluation work, not capabilities conferred by adding a database. See [delivery evidence](docs/DELIVERY.md), [independent data validation](docs/VALIDATION.md), and [browser verification](docs/UI_VALIDATION.md). Historical v1 evidence is explicitly separated from v2 publication revisions 3/4 checks and any remaining verification work. The Actions badge reflects repository checks, not a guarantee of hosted authentication, persistence, or security.
+
+## Recorded-activity reports and course summaries
+
+The private TPW workspace now includes `/sms/reports`: weekly/monthly activity from accepted SMS, a sourced one-page activity brief, and a separate review-and-save workflow using existing TPW course-summary fields. `/sms/demo/reports` is a clearly fictional public sample. These tools add no new data-collection indicators and never combine course participant/completer counts with SMS visits. See [reporting definitions, privacy, and migration contract](docs/REPORTING.md). Publication and hosted verification are separate delivery steps.
