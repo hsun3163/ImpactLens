@@ -10,7 +10,7 @@ import {
 } from '../src/lib/business-event-security';
 
 // Synthetic fixture bytes 0x00..0x1f, not a live callback or credential.
-const SECRET = 'whsec_AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=';
+const SECRET = `whsec_${Buffer.from(Uint8Array.from({ length: 32 }, (_, i) => i)).toString('base64')}`;
 const BODY = '{ "eventId": "evt_fixture", "data": { "message": "hello 🌍" } }\n';
 const ORIGIN = 'https://unit-test-events.chatgpt.com';
 const CALLBACK = `${ORIGIN}/fixture/callback-private?token=not-a-real-secret`;
