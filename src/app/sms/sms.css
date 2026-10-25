@@ -22,7 +22,7 @@
 .sms-shell .sms-heading{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:30px}
 .sms-shell .sms-heading p{margin-top:14px;color:var(--sms-muted);font-size:14px;line-height:1.7;max-width:750px}
 .sms-shell .sms-heading-actions{display:flex;gap:12px;align-items:center;flex-shrink:0}
-.sms-shell .sms-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:12px 17px;font-size:12px;font-weight:600;border:1px solid transparent;border-radius:7px;line-height:1.4;white-space:nowrap;min-height:42px}
+.sms-shell .sms-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:12px 17px;font-size:12px;font-weight:600;border:1px solid transparent;border-radius:7px;line-height:1.4;white-space:nowrap;min-height:44px}
 .sms-shell .sms-primary{background:#456b49;color:#fff;border-color:#456b49;box-shadow:0 2px 3px #213f3310}
 .sms-shell .sms-primary:hover:not(:disabled){background:#34563b}
 .sms-shell .sms-secondary{color:#52674b;background:#fffefa;border-color:#d9e2d2}
@@ -305,3 +305,55 @@
   .sms-shell .sms-report-story-method p{margin-top:6pt!important}
 }
 @media(prefers-reduced-motion:reduce){.sms-shell .sms-report-bar-track>span{transition:none}}
+
+/* The shared rehearsal follows two inputs, with phone setup separate from course metadata. */
+.sms-rehearsal-maintenance{display:flex;align-items:center;justify-content:space-between;gap:28px;padding:24px 28px;margin:25px 0;background:#f0f5e9;border:1px solid #dce6d2;border-radius:12px}.sms-rehearsal-maintenance h2{font-size:21px;color:#3e6046;margin:8px 0}.sms-rehearsal-maintenance p{font-size:12px;line-height:1.8;max-width:650px;color:#76876b}.sms-rehearsal-binding{background:#f6f9f2;border:1px solid #dfe7d6;border-radius:9px;padding:20px;margin:25px 0}.sms-rehearsal-binding>div{display:flex;align-items:center;gap:9px;color:#749264}.sms-rehearsal-binding h3{font-size:14px;font-weight:600;color:#4c6b43}.sms-rehearsal-binding>p{font-size:12px;color:#849276;line-height:1.8;margin:10px 0 16px}.sms-binding-form{display:grid;grid-template-columns:minmax(180px,.8fr) minmax(230px,1.4fr) auto;gap:14px;align-items:end}.sms-binding-form .sms-field{min-width:0}.sms-binding-form .sms-field select{width:100%;min-width:0;text-overflow:ellipsis}.sms-binding-status{font-size:11px!important;margin:15px 0 0!important;overflow-wrap:anywhere}.sms-binding-status strong{color:#a37f3f;font-weight:500}.sms-course-simulator{grid-template-columns:1fr 1fr auto!important}.sms-demo-examples{display:flex;gap:7px;flex-wrap:wrap;align-items:center}.sms-demo-examples>span{font-size:10px;flex-basis:100%;color:#829373}.sms-demo-examples button{background:#eff5e9;color:#69855c;padding:8px 10px;border:1px solid #dce6d2;border-radius:5px;font-size:12px;cursor:pointer}.sms-rehearsal-course{padding:27px;margin:30px 0}.sms-rehearsal-course-top{display:flex;align-items:flex-start;justify-content:space-between;gap:25px;padding-bottom:25px;border-bottom:1px solid #e3eadb;margin-bottom:25px}.sms-rehearsal-course-top h2{font-size:23px;color:#3c6042;margin:8px 0}.sms-rehearsal-course-top p{font-size:12px;color:#7f9074;line-height:1.8}.sms-rehearsal-course-top>.sms-field{width:45%;min-width:200px}.sms-rehearsal-course-top select{max-width:100%;text-overflow:ellipsis}.sms-demo-loading{padding:30px;text-align:center;color:#77906a;font-size:14px;line-height:1.8}
+@media(max-width:1000px){.sms-binding-form{grid-template-columns:1fr 1fr}.sms-binding-form>.sms-button{grid-column:1/-1;justify-self:start}.sms-course-simulator{grid-template-columns:1fr 1fr!important}.sms-course-simulator>.sms-button{grid-column:1/-1;justify-self:start}}
+@media(max-width:760px){.sms-rehearsal-maintenance{align-items:flex-start;flex-direction:column;padding:20px;gap:17px}.sms-rehearsal-maintenance h2{font-size:20px}.sms-rehearsal-binding{padding:17px}.sms-binding-form,.sms-course-simulator{grid-template-columns:1fr!important}.sms-binding-form>.sms-button,.sms-course-simulator>.sms-button{width:100%;justify-self:stretch}.sms-rehearsal-course{padding:22px 16px}.sms-rehearsal-course-top{flex-direction:column;gap:18px}.sms-rehearsal-course-top>.sms-field{width:100%;min-width:0}.sms-rehearsal-course-top select{font-size:16px}.sms-demo-examples{margin:0 0 9px}.sms-binding-form select{font-size:16px}.sms-rehearsal-binding h3{font-size:14px;line-height:1.6}.sms-binding-status{font-size:12px!important}}
+
+.sms-correction-form{display:grid;gap:10px;min-width:250px;max-width:360px;margin-top:10px;padding:12px;background:#f6f8f0;border:1px solid #dce5d2;border-radius:7px;white-space:normal}.sms-correction-form>p{font-size:11px;line-height:1.6;margin:0;color:#5d7151}.sms-correction-form label{display:flex;flex-direction:column;gap:5px;font-size:11px;color:#49623f}.sms-correction-form input{box-sizing:border-box;width:100%;min-width:0;border:1px solid #cfdcc3;border-radius:5px;padding:8px;background:#fffef9;color:#344f2e;font:inherit}.sms-correction-values{display:grid;grid-template-columns:1fr 1fr;gap:9px}.sms-correction-form .sms-actions{gap:10px;flex-wrap:wrap}.sms-correction-form .sms-button{font-size:11px;padding:8px 10px}@media(max-width:760px){.sms-correction-form input{font-size:16px}}
+
+/* Focused accessibility pass; keeps the existing screens and control model. */
+.sms-shell :is(.sms-kicker,.sms-product-label,.sms-private-label,.sms-panel-foot,.sms-screen-footer,.sms-footer,.sms-form-help,.sms-field,.sms-checkbox,.sms-table th,.sms-table td small,.sms-record-reason,.sms-record-controls,.sms-metric-label,.sms-metric p,.sms-org-row p,.sms-org-row small,.sms-program-row p,.sms-program-row small,.sms-feed-row p,.sms-feed-row time,.sms-live-strip>span:last-child,.sms-demo-bottom p,.sms-demo-examples>span,.sms-rehearsal-binding>p,.sms-rehearsal-maintenance p,.sms-rehearsal-course-top p,.sms-demo-preview,.sms-demo-flow,.sms-screen-top,.sms-format-note p,.sms-number-card small){color:#52674b;font-size:.875rem;line-height:1.65}
+.sms-shell :is(.sms-field>input,.sms-field>select,.sms-record-controls select,.sms-correction-form input){font-size:1rem;min-height:44px;border-color:#829478;color:#314b37}
+.sms-shell input::placeholder{font-size:1rem;color:#596b51;opacity:1}
+.sms-shell :is(.sms-button,.sms-text-button,.sms-topbar nav>a,.sms-back,.sms-demo-examples button){font-size:.875rem;min-height:44px}.sms-shell .sms-button{white-space:normal}
+.sms-shell :is(.sms-text-button,.sms-back,.sms-topbar nav>a,.sms-demo-examples button){color:#3e5b34}.sms-shell .sms-button.sms-secondary{color:#3e5b34;border-color:#829478}
+.sms-shell :is(.sms-icon-button,.sms-feedback>button){min-width:44px;min-height:44px;flex-shrink:0;color:#3e5b34}
+.sms-shell :is(.sms-demo-banner,.sms-alert,.sms-warning,.sms-badge-amber,.sms-binding-status strong){color:#755620;font-size:.875rem}
+.sms-shell .sms-error,.sms-shell .sms-inline-error{color:#863b23;font-size:.9375rem}.sms-shell .sms-success{color:#385b2e;font-size:.9375rem}
+.sms-shell .sms-status-badge{font-size:.8125rem;color:#3e5b34}.sms-shell .sms-status-badge.sms-badge-amber{color:#755620}.sms-shell .sms-badge-neutral{color:#52674b}
+.sms-shell :is(.sms-table,.sms-correction-form label,.sms-correction-form>p){font-size:.875rem;color:#3e5638}.sms-shell .sms-correction-form input{font-size:1rem}
+.sms-shell .sms-raw-body{font-size:.875rem;color:#3e5638}
+.sms-shell :is(a,button,input,select,textarea,summary,[tabindex]):focus-visible{outline:3px solid #244b2d;outline-offset:3px}
+.sms-shell :is(.sms-heading>div,.sms-demo-phone>div,.sms-number-card,.sms-setup-card,.sms-screen-inner){min-width:0;max-width:100%}.sms-shell :is(select,input,textarea){max-width:100%}
+@media(max-width:760px){.sms-shell .sms-topbar nav{flex-wrap:wrap}.sms-shell .sms-heading-actions{flex-wrap:wrap}.sms-shell .sms-binding-form{min-width:0}}
+
+.sms-shell :is(.sms-demo-phone p,.sms-howto p,.sms-heading p,.sms-empty p,.sms-admin-intro p,.sms-number-card span,.sms-step-header>span){color:#52674b;font-size:.9375rem;line-height:1.65}
+
+.sms-shell>main{margin:0;width:100%;min-width:0}
+/* Explicit child overrides where legacy colors do not inherit from their container. */
+.sms-shell :is(.sms-demo-phone b,.sms-demo-phone strong,.sms-demo-programs small,.sms-demo-org,.sms-screen-section-heading>span,.sms-screen-top>span:first-child,.sms-metric-value>span,.sms-demo-flow>span,.sms-demo-flow>span>span,.sms-live-strip>b){color:#52674b}
+.sms-shell :is(.sms-demo-programs small,.sms-screen-section-heading>span){font-size:.875rem}
+
+/* Optional business permissions stay separate from ordinary teacher registration. */
+.sms-shell .sms-business-settings{margin:24px 0;padding:0 22px}
+.sms-shell .sms-business-settings>summary{cursor:pointer;min-height:52px;padding:15px 0;font-size:1rem;font-weight:600;color:#314b37;line-height:1.5}
+.sms-shell .sms-business-body{padding:6px 0 22px;color:#52674b;font-size:.9375rem;line-height:1.65}
+.sms-shell .sms-business-body h3{font-size:1rem;color:#314b37;margin:0 0 10px;line-height:1.5}
+.sms-shell .sms-business-body p{margin:8px 0 14px;overflow-wrap:anywhere}
+.sms-shell .sms-business-forms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin:22px 0}
+.sms-shell .sms-business-forms form{min-width:0;padding:18px;border:1px solid #dce5d5;border-radius:8px;background:#fbfdf8}
+.sms-shell .sms-business-grants>div{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #e3e9dd}
+.sms-shell .sms-business-grants>div>span{min-width:0;overflow-wrap:anywhere}.sms-shell .sms-business-grants small{display:block;font-size:.875rem;color:#52674b}
+.sms-shell .sms-business-requests{margin-top:24px}.sms-shell .sms-business-requests ul{list-style:none;padding:0;margin:12px 0}
+.sms-shell .sms-business-requests li{padding:14px 0;border-top:1px solid #e3e9dd}.sms-shell .sms-business-requests li>div{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.sms-shell .sms-business-requests small{font-size:.875rem}.sms-shell .sms-business-requests summary{min-height:44px;padding:10px 0;cursor:pointer}
+.sms-shell .sms-business-message{white-space:pre-wrap;overflow-wrap:anywhere}.sms-shell .sms-business-import select{font:inherit;min-height:44px;border:1px solid #829478;background:#fcfdf8;color:#314b37;border-radius:5px;max-width:100%;padding:8px}
+@media(max-width:760px){.sms-shell .sms-business-settings{padding:0 15px}.sms-shell .sms-business-forms{grid-template-columns:1fr;gap:16px}.sms-shell .sms-business-grants>div{flex-wrap:wrap}}
+
+.rac-panel{margin:0 0 32px;padding:24px;background:#fffefa;border:1px solid #dbe4d2;border-radius:12px;color:#314b37;min-width:0}.rac-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}.rac-heading h2{font-size:21px;line-height:1.3}.rac-heading>span{font-size:12px;color:#52674b}.rac-actual{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.rac-panel h3,.rac-panel h4{font-size:14px;line-height:1.5;font-weight:600}.rac-actual strong{display:block;font-size:24px;margin:8px 0}.rac-panel p{font-size:13px;line-height:1.6;color:#52674b;margin:5px 0 0}.rac-example{margin-top:22px;border:1px solid #e5dcc5;background:#faf7ed;border-radius:8px;padding:20px}.rac-example-heading h3{color:#755620}.rac-example-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-top:18px}.rac-example-metrics strong{display:block;font-size:36px;letter-spacing:-.7px;line-height:1.25;margin-top:6px}.rac-example-metrics strong span{font-size:20px}.rac-panel .rac-progress{margin-top:20px;padding-top:14px;border-top:1px solid #e5dcc5;color:#3e5638}.rac-assumptions{margin-top:14px}.rac-assumptions summary{font-size:13px;cursor:pointer;min-height:44px;display:list-item;padding:12px 0}.rac-assumptions a{color:#345940;text-decoration:underline}.rac-panel :is(a,summary):focus-visible{outline:3px solid #244b2d;outline-offset:3px}@media(max-width:600px){.rac-panel{padding:18px 14px}.rac-actual{grid-template-columns:1fr;gap:16px}.rac-actual>div+div{padding-top:16px;border-top:1px solid #e5e9df}.rac-example{padding:16px 12px}.rac-example-metrics{gap:14px}.rac-example-metrics strong{font-size:30px}}@media(max-width:360px){.rac-example-metrics{grid-template-columns:1fr}}
+
+.rac-panel .rac-basis{margin-top:18px;padding-top:12px;border-top:1px solid #e5e9df}.rac-actual strong>span{font-size:18px}.rac-heading>span{display:inline-flex;align-items:center;gap:5px}
+
+.rac-live-estimates{grid-template-columns:repeat(2,minmax(0,1fr))}@media(max-width:600px){.rac-live-estimates{grid-template-columns:1fr}}

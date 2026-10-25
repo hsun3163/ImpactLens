@@ -1,12 +1,10 @@
 # Architecture
 
-## Scope and version boundary
+## Runtime architecture
 
-ImpactLens v2 is a Sites/Vinext application on Cloudflare Workers. React manages the dashboard and local preview state; Recharts renders descriptive visualizations. D1 stores owner-scoped project/report records and validated aggregate rows; R2 stores normalized CSV and generated report artifacts. The public evidence explorer remains usable without saving a project.
+ImpactLens runs on Sites/Vinext and Cloudflare Workers. React and Recharts provide the interface; D1 stores scoped application records and R2 stores aggregate CSV/report artifacts. A signed Twilio webhook handles deterministic attendance, repeat and reversal commands. Organization-scoped MCP tools connect an external assistant to auditable course-maintenance requests.
 
-v1 was a browser-only Next.js static export. Historical static-site build and browser results in `DELIVERY.md` and `UI_VALIDATION.md` apply only to that version unless explicitly replaced by v2 evidence. A backend implementation or successful build is not, by itself, proof of deployed persistence or authentication.
-
-There is no live language-model gateway, runtime agent orchestrator, individual-level record system, or causal evaluation engine.
+Public evidence exploration uses descriptive statistics. Runtime calculations and SMS attendance processing are deterministic; external natural-language interpretation uses the separately connected assistant. See [Twilio backend](TWILIO_BACKEND.md) and [business MCP](EXTERNAL_AGENT.md).
 
 ## Evidence preparation
 
@@ -77,8 +75,8 @@ Comparisons require compatible dimensions, release-year labels, outcomes, window
 
 Use Node 24 and the committed npm lockfile. `npm run install:ci` installs locked dependencies; `npm run dev` serves the portable preview at port 5173; `npm run build` produces `dist/client/` and the Worker configuration at `dist/server/wrangler.json`. The old `out/` static export is not a v2 deployment artifact. `npm start` runs a built Worker locally, not a production deployment.
 
-The Sites configuration binds D1 as `DB` and R2 as `BUCKET`. Production must provision these bindings, apply the generated D1 migrations, serve the client assets, and retain the trusted auth ingress. The build alone does none of the production access verification. See `BACKEND.md` for the deployment checklist and `DELIVERY.md` for verified outcomes.
+The Sites configuration binds D1 as `DB` and R2 as `BUCKET`. Production must provision these bindings, apply the generated D1 migrations, serve the client assets, and retain the trusted auth ingress. See `BACKEND.md` for the deployment checklist and `DELIVERY.md` for verification.
 
-## Deliberately not implemented
+## Data and decision scope
 
-Individual-level record ingestion/linkage, nonprofit connectors, identity resolution, team sharing, live LLM agents, causal estimation, automatic policy decisions, and production-grade data-governance/retention administration. Cloud persistence does not authorize or make these uses safe.
+The application operates on public outcome aggregates, saved aggregate projects and recorded program activity. Descriptive comparisons and labeled estimates support review and planning. Individual-level linkage, causal evaluation and regulated-data governance require a separately designed workflow; see [evaluation roadmap](EVALUATION_ROADMAP.md).

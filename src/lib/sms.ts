@@ -3,6 +3,13 @@ export const SMS_EXAMPLE = '20 2';
 export const SMS_FORMAT = 'attendees hours, for example 20 2 (20 attendee visits, 2 session hours)';
 export type SmsMetrics = { attendees: number; sessionMinutes: number };
 export type SmsParseResult = { ok: true; metrics: SmsMetrics } | { ok: false; reason: string };
+export type SmsCommand = { ok: true; kind: 'repeat' } | { ok: true; kind: 'numeric'; metrics: SmsMetrics } | { ok: false; reason: string };
+/** A repeat is a command, not invented metrics. Resolve its baseline atomically. */
+export function parseSmsCommand(body: string): SmsCommand {
+  if (body.length <= 1600 && body.trim() === '1') return { ok: true, kind: 'repeat' };
+  const parsed = parseSms(body);
+  return parsed.ok ? { ...parsed, kind: 'numeric' } : parsed;
+}
 export function parseSms(body: string): SmsParseResult {
   if (body.length > 1600) return { ok: false, reason: 'Message is longer than 1,600 characters.' };
   const match = /^(0|[1-9]\d{0,4}) +((?:0|[1-9]\d?)(?:\.(?:25|5|50|75))?)$/.exec(body.trim());
@@ -25,4 +32,10 @@ export async function verifyTwilioSignature(url: string, params: URLSearchParams
     const bytes = Uint8Array.from(atob(signature), char => char.charCodeAt(0));
     return await crypto.subtle.verify('HMAC', key, bytes, new TextEncoder().encode(payload));
   } catch { return false; }
+}
+
+/** A leading minus retracts one exact attendance event; it never adds negative counts. */
+export function parseSmsReversal(body: string): SmsParseResult {
+  if (body.length > 1600 || !/^-[0-9]/.test(body.trim())) return { ok: false, reason: 'Use -attendees hours to reverse one matching session.' };
+  return parseSms(body.trim().slice(1));
 }

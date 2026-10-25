@@ -1,18 +1,8 @@
 # Independent data and calculation validation
 
-## Version and scope
+The canonical evidence contains 38 CDCR aggregate rows, independently matched to archived report tables with source hashes, integer counts, published rounding and row-level locators. The current release reran this validation successfully alongside 325 automated tests.
 
-The detailed PDF review and independent numerical references below were recorded for the v1 official-data baseline on 24 October 2026. The v2 backend reuses the shared strict CSV/statistical functions and unchanged canonical evidence. Historical PDF validation does not, by itself, validate authentication, D1/R2 storage, owner isolation, deployment, or stored report delivery. Those checks are recorded separately in DELIVERY.md and UI_VALIDATION.md.
-
-### v2 verification update, publication revision 3
-
-The backend release published at 14:27:39 UTC on 2026-10-24 used hosting source `a3bebddec24e503601e2502ed1f7464731fc6d61`. Its automated suite passed 37 tests. Thirteen checks against the actual built local Worker with D1/R2 passed, including server-computed rates/Wilson intervals and stored reports surviving a process restart. The deployed canonical dataset matches all 38 official rows; authenticated browser inspection confirmed the six-row synthetic report contents and correct rates.
-
-These results preserve the distinction between source fidelity, deterministic calculation, storage behavior, and hosted access. They do not establish causal validity or de-identification. Publication revision 4 deployed the synthetic-label import correction at 14:53:48 UTC with source `156269a539eeb778b45aa7e96bae47ec70fdc992`. Typechecking, the production Worker build, and all 38 tests pass, including synthetic-label preservation through import, saved project reopening, server analysis, and JSON/CSV/Markdown reports. All 11 live anonymous/security checks passed again; existing saved projects reopen and stored reports remain byte-identical. The final hosted imported-CSV save/report regression passed at 14:55 UTC: six synthetic rows, correct counts/rates, and synthetic warnings survived explicit save, reload/reopen, server analysis, and inspected JSON/CSV/Markdown downloads.
-
-Backend code was pushed to GitHub commit `500da191720ac0224f504d6d894856e385f741e2`. The [backend CI run](https://github.com/hsun3163/ImpactLens/actions/runs/40104610755) passed every job and step for that exact head, verified at 14:55:57 UTC. Its gates include checksum-verified PDF restoration, independent data validation, and canonical-data regeneration/drift checks in addition to typechecking, tests, and the Worker build.
-
-Review date: 2026-10-24. Scope: the selected 38-row official CDCR aggregate extract, its archived PDFs, source manifest, exact-text evidence, and deterministic statistical core. This is not validation of individual records, the original CDCR administrative systems, or causal program effects.
+The detailed numerical review below was first recorded on October 24, 2026. Backend and browser verification are summarized separately in [DELIVERY.md](DELIVERY.md).
 
 ## Reproduce
 

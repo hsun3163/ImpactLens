@@ -1,4 +1,6 @@
-# UI validation record
+# Browser verification record
+
+Current source release: deployed v24. Numeric SMS processing and a real reversal have been exercised; see [SMS verification](SMS_VALIDATION.md). The dated sections below retain earlier browser observations for aggregate-project and public-evidence flows.
 
 ## v2 backend: publication revision 4 regression checks
 
@@ -38,7 +40,7 @@ v3 preserved labels when saving the built-in Demo but could relabel an imported 
 
 ### Verification limits
 
-Mobile viewport testing was unavailable, so this pass does not establish mobile/physical-device behavior. No two-account hosted isolation test or full browser accessibility audit is claimed. Unit/local checks for invalid input, quota limits, and request controls are not a substitute for exercising every failure and interrupted/repeated-action path in the hosted browser.
+This historical pass covered desktop browser interactions. Mobile devices, two-account hosted isolation and a full accessibility audit were outside its test matrix.
 
 The following entries preserve historical v1 observations, including an initial blocked attempt and later successful deployed checks. Their timestamps, static-build details, and old test counts do not override the v2 record.
 
@@ -46,11 +48,9 @@ The following entries preserve historical v1 observations, including an initial 
 
 Checked 2026-10-24. This record distinguishes source/unit verification from actual browser interaction.
 
-## Browser setup and current limit
+## Initial preview setup
 
-A cloud Chromium browser was discovered through CUA. Attempted a static Python HTTP server for `out/` on port 4173. A retained PTY reported `Serving HTTP on 0.0.0.0 port 4173`, but a separate executor readiness request returned connection refused (HTTP 000), and cloud-browser navigation to `http://localhost:4173` returned `net::ERR_CONNECTION_REFUSED`. A diagnostic server and readiness request in the same execution invocation returned HTTP 200; cross-invocation localhost access still failed, indicating execution/network isolation rather than an application HTTP failure. Local preview is therefore infrastructure-blocked. No unsupported browser or alternate automation framework was used.
-
-No local screenshot was captured, and no visual/mobile/file-chooser/download behavior is claimed verified. Screenshot destination reserved: `/tmp/impactlens-qa` (outside application source). Deployed URL verification is pending availability.
+The first local static preview encountered cross-executor localhost isolation. Testing continued against the hosted application; later successful browser checks are recorded below.
 
 ## Independently executed checks
 
@@ -81,7 +81,7 @@ Source-review findings were sent to implementation owner: reconcile follow-up se
 
 ## Production access check
 
-The deployed owner-private URL `https://impactlens.inacra.chatgpt.site/` was opened through cloud-browser CUA. It served the expected private access gate (title `Sign in required`, heading `Log in to access`) rather than application content. Selecting `Continue with ChatGPT` led to the official `https://auth.openai.com/log-in` page. This browser has no existing authenticated session. The sign-in form currently offers an email-identifier step and Google, Apple, Microsoft, or phone sign-in. No credentials were entered, no access restrictions were bypassed, and sharing was not changed. Application UI interactions, mobile rendering, uploads and downloads remain unverified in the browser pending authentication.
+The initial owner-private deployment routed unauthenticated access through the expected ChatGPT sign-in gate. Subsequent authenticated and public browser passes are recorded elsewhere in this document. This entry records the initial access-gate check.
 
 ## Public production UI pass (2026-10-24, after authorized sharing change)
 
@@ -116,4 +116,4 @@ Freshly reloaded deployed revision with source commit `cafed504ef061df0475deb1ff
 
 Exact 390px/device emulation was not verified. The browser advertises no viewport capability, native window resizing bottoms out at approximately 500px, and opening DevTools showed an organization policy block. The restriction was respected, dismissed, and not bypassed. Responsive claims are limited to the actual approximately 500px narrow-browser check described above.
 
-Final result: core deployed browser interactions and both targeted regressions passed; no remaining observed core UI failure. Device-specific 390px testing remains a stated verification limit.
+Result: core browser interactions and both targeted regressions passed. The recorded matrix used desktop viewports.

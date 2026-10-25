@@ -8,13 +8,17 @@ export type ReportBucket = ReportTotals & { start: string; end: string; label: s
 export type ReportOrganization = { id: string; name: string; active: boolean };
 export type ReportProgram = ReportOrganization & { organizationId: string };
 export type SmsReport = {
-  generatedAt: string; source: 'live-sms' | 'synthetic-demo'; selection: ReportSelection;
+  generatedAt: string; source: 'live-sms' | 'synthetic-demo' | 'mixed-activity'; selection: ReportSelection;
   subject: string; organizations: ReportOrganization[]; programs: ReportProgram[];
   current: ReportPeriod; previous: ReportPeriod; buckets: ReportBucket[];
   programActivity: (ReportTotals & { id: string; name: string; organizationName: string })[];
   coverage: { firstRecordedDate: string | null; lastRecordedDate: string | null; completeness: 'unknown' };
 };
 export const REPORT_METHOD = 'Source: accepted SMS check-ins, grouped by receipt date in UTC, not verified class dates. Participant visits include repeat attendance and are not unique people. Participant-hours = attendance × reported session duration, assuming everyone attended the full session. Weeks without check-ins mean no records, not no service. Reporting completeness is unknown; period differences may reflect reporting changes. Course summaries are separate and excluded. This describes recorded activity, not retention, adherence, outcomes, or causal impact.';
+
+export function reportMethod(source: SmsReport['source']): string {
+  return source === 'mixed-activity' ? REPORT_METHOD.replace('Source: accepted SMS check-ins, grouped by receipt date in UTC, not verified class dates.', 'Source: accepted SMS check-ins and generated center activity, grouped by recorded date in UTC, not verified class dates or actual organizational outcomes.') : REPORT_METHOD;
+}
 const DAY = 86400000;
 const ID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 export function validReportDate(value: string): boolean {
@@ -67,7 +71,7 @@ export function recordedComparison(report: SmsReport): string {
 export function fundingStory(report: SmsReport): { title: string; paragraphs: string[]; text: string } {
   const { current: c } = report;
   const title = `${report.subject} · Recorded activity brief`;
-  const label = report.source === 'synthetic-demo' ? 'SYNTHETIC DEMO · Not real organizational activity' : 'ACCEPTED SMS CHECK-INS · Aggregate activity';
+  const label = report.source === 'synthetic-demo' ? 'SYNTHETIC DEMO · Not real organizational activity' : report.source === 'mixed-activity' ? 'RECORDED CENTER ACTIVITY · Includes generated center records' : 'ACCEPTED SMS CHECK-INS · Aggregate activity';
   const range = `${formatReportDate(c.start)}–${formatReportDate(c.end)} · UTC receipt dates`;
   const paragraphs = c.sessions ? [
     `${report.subject} recorded ${number(c.sessions)} session check-ins and ${number(c.attendees)} participant visits in this period. Together, these reports represent ${number(c.sessionMinutes / 60)} session hours and approximately ${number(c.participantMinutes / 60)} participant-hours.`,
@@ -75,5 +79,5 @@ export function fundingStory(report: SmsReport): { title: string; paragraphs: st
     recordedComparison(report),
     'For a funding conversation, this is a concrete account of the learning time reported by these programs. It makes delivered activity visible while leaving outcomes and funding needs to be supported separately.',
   ] : ['No accepted SMS check-ins are recorded for this selection yet. Start with the first session report, or choose another period to build a brief from recorded activity.'];
-  return { title, paragraphs, text: [label, title, range, '', ...paragraphs.flatMap(p => [p, '']), `Reporting coverage: ${c.activeDays} of ${c.days} dates have check-ins; completeness is unknown.`, REPORT_METHOD, `Prepared from records available at ${report.generatedAt}.`].join('\n') };
+  return { title, paragraphs, text: [label, title, range, '', ...paragraphs.flatMap(p => [p, '']), `Reporting coverage: ${c.activeDays} of ${c.days} dates have check-ins; completeness is unknown.`, reportMethod(report.source), `Prepared from records available at ${report.generatedAt}.`].join('\n') };
 }

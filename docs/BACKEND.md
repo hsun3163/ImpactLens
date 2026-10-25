@@ -1,10 +1,10 @@
 # Backend operations and API
 
-## Scope and verification status
+## Aggregate-project backend
 
 v2 adds persistent, user-owned aggregate projects and deterministic server reports to the public evidence explorer. The implementation uses Sites/Vinext on Cloudflare Workers, a D1 binding named `DB`, and an R2 binding named `BUCKET`. It makes no runtime LLM calls or external research/API requests. Storage bindings are application infrastructure, not model services.
 
-This document describes the implementation contract. It does not certify that a particular hosted revision has working bindings, migrations, authentication, or persistence. Record those results against an exact commit in [DELIVERY.md](DELIVERY.md); historical v1 static-site checks are not v2 evidence.
+This guide covers aggregate storage, API behavior and installation. For SMS and assistant services, see [Twilio backend](TWILIO_BACKEND.md). Release checks are in [DELIVERY.md](DELIVERY.md).
 
 ## What is local, and what is saved
 

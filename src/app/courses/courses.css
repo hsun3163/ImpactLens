@@ -10,3 +10,69 @@
 /* Readable primary controls for people who do not use admin software every day. */
 .cm-editor label,.cm-name-form label,.cm-field-label{font-size:13px}.cm-editor-intro{font-size:13px;line-height:1.85}.cm-editor legend{font-size:16px}.cm-status-options button{font-size:13px;min-height:46px}.cm-editor input,.cm-editor select,.cm-editor textarea{font-size:15px;min-height:47px}.cm-editor label small{font-size:11px}.cm-field-note{font-size:11px!important}.cm-course-program{font-size:12px}.cm-card-actions button{font-size:12px}.cm-content-heading p{font-size:12px}.cm-card-values dt{font-size:10px;min-height:32px}.cm-yard{font-size:11px}.cm-card-dates{font-size:11px}.cm-status{font-size:10px}.cm-save-bar .cm-button{font-size:13px!important;min-height:46px}.cm-save-bar>p{font-size:11px}.cm-save-bar small{font-size:10px}.cm-back{font-size:12px;min-height:34px}
 @media(max-width:760px){.cm-editor input,.cm-editor select,.cm-editor textarea{font-size:16px}.cm-status-options button{font-size:13px}.cm-card-actions button{min-height:40px;font-size:12px}.cm-field-grid{grid-template-columns:1fr}.cm-card-values dt{min-height:32px}.cm-notes summary{font-size:12px}.cm-content-heading>.cm-button{font-size:15px!important}.cm-editor-intro{font-size:12px}.cm-organization-bar strong{font-size:16px}}
+
+/* Clear, touch-sized course actions at every viewport. */
+.cm-button,.cm-content-heading>.cm-button,.cm-back{min-height:44px}.cm-card-actions{flex-wrap:wrap}.cm-card-actions button{font-size:13px;min-height:44px;padding:8px 4px;line-height:1.4}
+
+/* Focused accessibility pass: readable text, distinguishable inputs, keyboard focus. */
+.cm-shell{--cm-muted:#52674b;font-size:1rem}
+.cm-shell :is(.cm-product,.cm-topbar nav,.cm-eyebrow,.cm-independence,.cm-course-program,.cm-yard,.cm-card-dates,.cm-card-values dt,.cm-card-identity,.cm-history-foot,.cm-footer,.cm-history-toolbar>span,.cm-organization-bar span,.cm-organization-bar details,.cm-settings label,.cm-settings p,.cm-content-heading p,.cm-page-heading p,.cm-editor-intro,.cm-name-form>p,.cm-empty p,.cm-access p,.cm-notes summary,.cm-notes summary>span,.cm-notes p,.cm-derived,.cm-derived>span,.cm-derived small,.cm-save-bar>p,.cm-save-bar small){color:#52674b;font-size:.875rem;line-height:1.65}
+.cm-shell :is(.cm-editor label,.cm-name-form label,.cm-field-label){color:#3e5638;font-size:.9375rem}
+.cm-shell .cm-editor label small,.cm-shell .cm-field-note{color:#52674b!important;font-size:.8125rem!important;line-height:1.65}
+.cm-shell :is(.cm-mode-note,.cm-mode-note b,.cm-mode-note>span){font-size:.8125rem;color:#52674b}
+.cm-shell :is(.cm-demo-note,.cm-demo-note>span,.cm-demo-note b,.cm-draft-badge,.cm-status-in-progress){color:#755620}
+.cm-shell :is(.cm-status,.cm-draft-badge){font-size:.8125rem;white-space:normal}.cm-shell .cm-status-completed{color:#385b2e}
+.cm-shell :is(.cm-text-button,.cm-back,.cm-small-actions button,.cm-card-actions button,.cm-organization-bar summary){font-size:.875rem;color:#3e5b34;min-height:44px}
+.cm-shell .cm-button{font-size:.875rem!important}.cm-shell .cm-button:not(.cm-primary){color:#3e5b34;border-color:#829478}
+.cm-shell :is(.cm-editor input,.cm-editor select,.cm-editor textarea,.cm-name-form input,.cm-settings select,.cm-inline-program select,.cm-yard-select select,.cm-filter){font-size:1rem;color:#314b37;border-color:#829478;min-height:44px}
+.cm-shell :is(input,textarea)::placeholder{color:#596b51;font-size:1rem;opacity:1}
+.cm-shell .cm-search{border:1px solid #829478;border-radius:6px;padding:0 8px}.cm-shell .cm-search input{font-size:1rem;color:#314b37;min-height:44px}
+.cm-shell .cm-status-options button{border-color:#829478;color:#3e5b34}.cm-shell .cm-status-options .cm-active{border-color:#426b49;box-shadow:inset 0 0 0 1px #426b49}
+.cm-shell .cm-alert{font-size:.9375rem;color:#755620}.cm-shell .cm-error{color:#863b23}.cm-shell .cm-success{color:#385b2e}
+.cm-shell :is(.cm-icon-button,.cm-alert>button){min-width:44px;min-height:44px;flex-shrink:0;color:#3e5b34}.cm-shell .cm-mode-note>button{min-height:44px;font-size:.875rem;color:#755620}
+.cm-shell :is(a,button,input,select,textarea,summary,[tabindex]):focus-visible{outline:3px solid #244b2d;outline-offset:3px}
+.cm-shell :is(.cm-content,.cm-organization-bar>div,.cm-editor-heading>div){min-width:0}.cm-shell :is(input,select,textarea){max-width:100%}
+@media(max-width:760px){.cm-shell .cm-history-toolbar>div{flex-wrap:wrap}.cm-shell .cm-search{flex:1;min-width:150px}.cm-shell .cm-search input{width:100%}.cm-shell .cm-filter{max-width:100%}.cm-shell .cm-topbar nav{flex-wrap:wrap}}
+
+.cm-shell .cm-status,.cm-shell .cm-derived b{color:#52674b}.cm-shell .cm-status-in-progress{color:#755620}.cm-shell .cm-status-completed{color:#385b2e}
+.cm-shell .cm-editor [aria-invalid=true]{border:2px solid #863b23}
+
+/* Optional status editing stays out of the main course form. */
+.cm-additional-details{border-block:1px solid #e0e5d8;padding:4px 0}
+.cm-additional-details>summary{min-height:44px;padding:10px 0;cursor:pointer;color:#3e5638;font-size:.9375rem;line-height:1.65}
+.cm-additional-details>summary>span{display:inline-block;margin-left:8px;color:#52674b;font-size:.875rem}
+.cm-additional-body{padding:8px 0 12px}.cm-additional-body>.cm-field-label{display:block;margin-bottom:10px}
+.cm-shell .cm-additional-details .cm-status-options button{min-height:44px;font-size:.875rem}
+@media(max-width:420px){.cm-additional-details>summary>span{display:block;margin-left:18px}.cm-additional-details .cm-status-options{flex-wrap:wrap}.cm-additional-details .cm-status-options button{min-width:88px}}
+
+/* Program workspace: one full-width horizontal record or field per row. */
+.cm-shell .cm-history-rows{display:flex;flex-direction:column;gap:0}
+.cm-shell .cm-history-rows>.cm-course-card{display:grid;grid-template-columns:minmax(220px,1.2fr) minmax(270px,1.1fr) minmax(180px,.7fr);gap:28px;align-items:center;width:100%;border:0;border-top:1px solid var(--cm-line);border-radius:0;padding:24px 0;box-shadow:none}
+.cm-history-rows .cm-course-identity,.cm-history-rows .cm-course-controls{min-width:0}
+.cm-history-rows .cm-card-top{justify-content:flex-start;gap:12px;margin-bottom:10px}
+.cm-history-rows .cm-site-icon{display:none}
+.cm-history-rows .cm-course-card h3{margin-top:6px}
+.cm-history-rows .cm-card-values{margin:0;padding:0;border:0;gap:16px}
+.cm-history-rows .cm-card-values dt{min-height:0;margin-bottom:6px}
+.cm-history-rows .cm-card-identity{margin:10px 0 0}
+.cm-history-rows .cm-course-controls{display:flex;flex-direction:column;gap:8px}
+.cm-history-rows .cm-card-actions{margin:0;padding:0;border:0;display:flex;flex-direction:column;align-items:stretch;gap:4px}
+.cm-history-rows .cm-card-actions button,.cm-history-rows .cm-view-attendance{justify-content:flex-start;text-align:left;margin:0;min-height:44px;padding:8px 0}
+.cm-shell .cm-row-editor{max-width:none;width:100%}
+.cm-row-editor .cm-inline-program,.cm-row-editor .cm-field-grid{display:flex;flex-direction:column;gap:0}
+.cm-row-editor .cm-inline-program>label,.cm-row-editor .cm-field-grid>label,.cm-row-editor .cm-field-grid>div.cm-field-wide{display:grid;grid-template-columns:minmax(190px,.38fr) minmax(0,1fr);align-items:center;column-gap:28px;row-gap:8px;border-top:1px solid var(--cm-line);padding:18px 0;width:100%;margin:0;min-width:0}
+.cm-row-editor :is(.cm-inline-program>label,.cm-field-grid>label)>:is(input,select){margin:0;width:100%;grid-column:2}
+.cm-row-editor :is(.cm-inline-program>label,.cm-field-grid>label)>small{grid-column:2;margin:0}
+.cm-row-editor .cm-field-grid>div.cm-field-wide>label:not(:has(input)){grid-column:1;grid-row:1;margin:0}
+.cm-row-editor .cm-field-grid>div.cm-field-wide>:is(.cm-input-icon,.cm-yard-select){grid-column:2;grid-row:1;min-width:0}
+.cm-row-editor .cm-field-grid>div.cm-field-wide>:is(small,p,label:has(input)){grid-column:2;margin:0}
+.cm-row-editor .cm-field-grid>div.cm-field-wide>label:has(input){padding-top:8px}
+.cm-row-editor fieldset{padding:20px 0 0;border:0;margin-top:18px;min-width:0}
+.cm-row-editor fieldset>legend{padding:0;margin-bottom:8px}
+.cm-row-editor .cm-additional-details{width:100%;padding:8px 0;border-bottom:0}
+.cm-row-editor .cm-additional-body{display:grid;grid-template-columns:minmax(190px,.38fr) minmax(0,1fr);gap:28px;align-items:center}
+.cm-row-editor .cm-additional-body>.cm-field-label{margin:0}
+.cm-row-editor .cm-status-options{width:100%;margin:0}
+.cm-row-editor .cm-notes,.cm-row-editor .cm-derived,.cm-row-editor .cm-save-bar{border-radius:0;box-shadow:none;width:100%}
+@media(max-width:1100px){.cm-shell .cm-history-rows>.cm-course-card{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}.cm-history-rows .cm-course-controls{grid-column:1/-1;flex-direction:row;flex-wrap:wrap;gap:20px}.cm-history-rows .cm-card-actions{flex-direction:row;flex-wrap:wrap;gap:20px}}
+@media(max-width:640px){.cm-shell .cm-history-rows>.cm-course-card{grid-template-columns:minmax(0,1fr);gap:18px}.cm-history-rows .cm-card-values{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.cm-history-rows .cm-card-values dt{font-size:.8125rem}.cm-row-editor .cm-inline-program>label,.cm-row-editor .cm-field-grid>label,.cm-row-editor .cm-field-grid>div.cm-field-wide,.cm-row-editor .cm-additional-body{grid-template-columns:minmax(0,1fr);gap:10px}.cm-row-editor :is(.cm-inline-program>label,.cm-field-grid>label)>:is(input,select,small),.cm-row-editor .cm-field-grid>div.cm-field-wide>:is(label,.cm-input-icon,.cm-yard-select,small,p,label:has(input)){grid-column:1;grid-row:auto}.cm-row-editor .cm-field-grid>div.cm-field-wide>label:not(:has(input)){grid-row:auto}.cm-row-editor .cm-status-options{flex-wrap:wrap}.cm-row-editor .cm-save-bar{position:static;align-items:stretch}.cm-row-editor .cm-save-bar>.cm-button-row{width:100%}}

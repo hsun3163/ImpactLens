@@ -16,3 +16,26 @@
 @media(max-width:1100px){.cloud-ribbon{flex-wrap:wrap}.cloud-ribbon-actions{gap:15px}.cloud-ribbon-copy{flex:1}.cloud-welcome{gap:25px}.server-actions>span{margin-left:0;flex-basis:100%}}
 @media(max-width:700px){.topbar-right{gap:8px}.topbar .account-link{font-size:9px;padding:7px 8px}.topbar .account-link svg,.topbar .top-avatar,.topbar .help-button{display:none}.breadcrumb{font-size:10px}.cloud-ribbon{padding:15px;gap:11px}.cloud-ribbon-copy b{font-size:11px}.cloud-ribbon-copy p{font-size:9px}.cloud-ribbon-actions{flex-basis:100%;justify-content:flex-end}.cloud-ribbon-actions .text-button{margin-right:auto}.cloud-body{padding:20px 16px}.cloud-welcome{grid-template-columns:1fr;padding:4px 0 10px;gap:30px}.cloud-welcome h2{font-size:23px}.cloud-welcome ul{gap:22px}.projects-section-heading{align-items:flex-start}.projects-section-heading h2{font-size:15px}.projects-section-heading p{font-size:10px}.project-item{padding:13px 11px;gap:10px;flex-wrap:wrap}.project-item h3{font-size:11px}.project-item p{font-size:9px}.project-icon{width:33px;height:33px}.project-item .button{font-size:9px;padding:7px 9px}.project-item>div{min-width:140px}.server-actions{gap:10px}.server-actions .button{font-size:10px;padding:10px}.server-result-heading{flex-wrap:wrap;padding:13px;font-size:10px}.server-result-heading>span{width:100%;margin:0 0 0 24px}.saved-reports{padding:16px}.report-item{align-items:flex-start;flex-direction:column;gap:12px}.report-downloads{gap:18px}.save-overlay{padding:14px}.save-dialog{padding:22px;max-height:calc(100dvh - 28px)}.save-dialog h2{font-size:23px}.save-dialog-actions{justify-content:stretch}.save-dialog-actions .button{font-size:10px;justify-content:center}.save-dialog-actions .primary{flex:1}.mode-selector{flex-wrap:wrap}.mode-selector button{min-width:70px}.cloud-feedback{padding:12px 15px;font-size:10px}}
 .server-synthetic-note{padding:12px 18px;background:#fff5df;border-top:1px solid #eee4c9;color:#917449;font-size:10px;line-height:1.8}
+
+/* Shared contextual help. Portaled to avoid clipping inside cards and tables. */
+.il-help.il-help{display:inline-flex;vertical-align:middle;align-items:center;flex:none;margin-left:5px;font:inherit;letter-spacing:normal;text-transform:none;line-height:1;white-space:normal}
+.il-help-trigger.il-help-trigger{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border:1px solid #b7cbb2;border-radius:50%;color:#4e7049;background:#f4f8f0;font-family:inherit;font-size:12px;font-weight:600;line-height:1;cursor:help;touch-action:manipulation}
+.il-help-trigger.il-help-trigger:hover,.il-help-trigger.il-help-trigger[aria-expanded=true]{background:#e6efdf;color:#2f542b;border-color:#7f9e73}
+.il-help-trigger.il-help-trigger:focus-visible{outline:2px solid #466c40;outline-offset:3px}
+.il-help-panel{position:fixed;z-index:10000;box-sizing:border-box;display:block;width:304px;max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);overflow:auto;padding:12px 14px;border:1px solid #cbd9c1;border-radius:8px;background:#fffef9;color:#455b3e;box-shadow:0 6px 24px #263e2724;font-family:Arial,sans-serif;font-size:12px;font-weight:400;line-height:1.65;letter-spacing:normal;text-align:left;text-transform:none;white-space:normal}
+.il-help-panel strong{display:block;font-size:12px;font-weight:600;margin:0 0 4px;color:#304e2c}.il-help-panel>span{display:block}
+@media(pointer:coarse){.il-help-trigger.il-help-trigger{width:44px;height:44px;font-size:14px}}
+
+/* Quiet metadata estimate, visually separate from reported attendance metrics. */
+.il-estimate{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:16px 0;padding:15px 18px;border:1px solid #dce5d5;border-radius:8px;background:#f8faf4;color:#52674b}
+.il-estimate-label{display:flex;align-items:center;gap:2px;font-size:14px;font-weight:600;line-height:1.4}
+.il-estimate p{margin:4px 0;font-size:12px;line-height:1.5}.il-estimate small{display:block;font-size:11px;line-height:1.6;color:#687961}
+.il-estimate-value{flex:none;font-size:23px;font-weight:550;text-align:right;line-height:1.4}.il-estimate-value small{font-weight:400}
+@media(max-width:600px){.il-estimate{flex-wrap:wrap;padding:14px;gap:10px}.il-estimate-value{text-align:left;font-size:22px}.il-estimate small{font-size:12px}}
+
+@media(max-width:760px){.il-help-trigger.il-help-trigger{width:44px;height:44px;font-size:14px}}
+
+/* Visible on keyboard focus, without adding another navigation step for pointer users. */
+.il-skip-link{position:fixed;left:12px;top:12px;z-index:20000;transform:translateY(-180%);padding:12px 18px;background:#fffefa;color:#244b2d;border:2px solid #244b2d;border-radius:6px;font-size:1rem;min-height:44px}.il-skip-link:focus{transform:none;outline:3px solid #244b2d;outline-offset:3px}
+.il-help-panel,.il-help-panel strong{font-size:.875rem}.il-estimate small{font-size:.8125rem;color:#52674b}
+@media(prefers-reduced-motion:reduce){.cm-shell *,.sms-shell *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}

@@ -1,3 +1,4 @@
+import type { CourseServiceEstimate, CourseEstimateTotals } from './course-estimate';
 /** Manual TPW course summaries are a separate source from SMS session activity. */
 export const COURSE_SUMMARY_SOURCE = 'Manual course summary' as const;
 export const COURSE_SUMMARY_LIMIT = 100;
@@ -14,10 +15,10 @@ export type CourseSummaryValues = {
 export type CourseSummaryWrite = CourseSummaryValues & { id: string; revision: number };
 export type CourseSummary = CourseSummaryWrite & {
   organizationName: string; programName: string; source: typeof COURSE_SUMMARY_SOURCE;
-  createdAt: string; updatedAt: string;
+  createdAt: string; updatedAt: string; serviceEstimate?: CourseServiceEstimate;
 };
 export type CourseSummaryData = {
-  summaries: CourseSummary[];
+  summaries: CourseSummary[]; serviceEstimate?: CourseEstimateTotals;
   organizations: { id: string; name: string; active: boolean }[];
   programs: { id: string; organizationId: string; name: string; active: boolean }[];
   source: typeof COURSE_SUMMARY_SOURCE; limit: number; truncated: boolean; generatedAt: string;

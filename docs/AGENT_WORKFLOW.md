@@ -2,7 +2,7 @@
 
 ## Two different meanings of “agent”
 
-Native AI roles assisted development of this prototype. The shipped application does **not** invoke those roles, call a model API, or autonomously research new evidence. Its five-stage workflow and server-generated reports are deterministic software. Calling these runtime stages live AI agents would be inaccurate.
+Native AI roles assisted development. The shipped five-stage evidence workflow and server-generated reports use deterministic code. The separate business MCP interface connects an external assistant to scoped course-maintenance requests.
 
 ## Development collaboration actually used
 
@@ -43,6 +43,6 @@ Choosing a CSV and running the browser workflow do not implicitly save it. Savin
 
 ## Verification and honest delivery
 
-The local checks are TypeScript typechecking, Node unit tests, independent Python data validation, canonical-data regeneration, backend authorization/storage tests, and a production Worker build. GitHub Actions is configured to restore source PDFs with checksum verification and repeat these checks on a clean Node 24 runner using the portable build path. Browser QA and hosted access checks provide separate evidence; a successful unit test is not proof that every control works in a deployed browser.
+The local checks are TypeScript typechecking, Node unit tests, independent Python data validation, canonical-data regeneration, backend authorization/storage tests, and a production Worker build. GitHub Actions is configured to restore source PDFs with checksum verification and repeat these checks on a clean Node 24 runner using the portable build path. Browser QA covers interaction and hosted-access behavior alongside these automated checks.
 
-Verified delivery and remaining scope are recorded in DELIVERY.md; source and browser verification are recorded separately. Historical v1 evidence does not verify the v2 auth gateway, D1/R2 provisioning, cross-user isolation, or persistence after reload.
+Current release checks and historical source references are recorded in [DELIVERY.md](DELIVERY.md); browser observations are in [UI_VALIDATION.md](UI_VALIDATION.md).

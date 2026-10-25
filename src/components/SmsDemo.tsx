@@ -1,95 +1,147 @@
 'use client';
 
-import { useMemo, useRef, useState, type FormEvent } from 'react';
-import { ArrowRight, ArrowUpRight, CheckCircle2, CircleAlert, FlaskConical, MessageSquare, Radio, RotateCcw, Send, ShieldCheck, Smartphone } from 'lucide-react';
-import { parseSms } from '@/lib/sms';
-import { SmsMetrics, smsNumber, type SmsTotals } from './SmsDashboard';
+import RacMetrics from './RacMetrics';
 
-type DemoOrganization = { id: string; name: string; initials: string };
-type DemoProgram = { id: string; organizationId: string; name: string };
-type DemoTeacher = { id: string; name: string; phone: string; programId: string };
-type DemoRecord = { id: string; teacherId: string; programId: string; organizationId: string; attendees: number; sessionMinutes: number; body: string };
-const organizations: DemoOrganization[] = [
-  { id: 'demo-arts', name: 'Second Chapter Arts', initials: 'SC' },
-  { id: 'demo-pathways', name: 'Open Pathways', initials: 'OP' },
-  { id: 'demo-community', name: 'Common Ground', initials: 'CG' },
-];
-const programs: DemoProgram[] = [
-  { id: 'demo-writing', organizationId: 'demo-arts', name: 'Creative Writing' },
-  { id: 'demo-visual', organizationId: 'demo-arts', name: 'Visual Arts' },
-  { id: 'demo-work', organizationId: 'demo-pathways', name: 'Career Readiness' },
-  { id: 'demo-literacy', organizationId: 'demo-pathways', name: 'Digital Literacy' },
-  { id: 'demo-wellbeing', organizationId: 'demo-community', name: 'Wellbeing & Connection' },
-];
-const teachers: DemoTeacher[] = [
-  { id: 'demo-maya', name: 'Maya · Creative Writing', phone: '+12025550101', programId: 'demo-writing' },
-  { id: 'demo-alex', name: 'Alex · Visual Arts', phone: '+12025550102', programId: 'demo-visual' },
-  { id: 'demo-jordan', name: 'Jordan · Career Readiness', phone: '+12025550103', programId: 'demo-work' },
-  { id: 'demo-sam', name: 'Sam · Digital Literacy', phone: '+12025550104', programId: 'demo-literacy' },
-  { id: 'demo-robin', name: 'Robin · Wellbeing', phone: '+12025550105', programId: 'demo-wellbeing' },
-];
-const seedRecords: DemoRecord[] = [
-  { id: 'seed-1', teacherId: 'demo-maya', programId: 'demo-writing', organizationId: 'demo-arts', attendees: 18, sessionMinutes: 120, body: '18 2' },
-  { id: 'seed-2', teacherId: 'demo-alex', programId: 'demo-visual', organizationId: 'demo-arts', attendees: 24, sessionMinutes: 90, body: '24 1.5' },
-  { id: 'seed-3', teacherId: 'demo-jordan', programId: 'demo-work', organizationId: 'demo-pathways', attendees: 16, sessionMinutes: 120, body: '16 2' },
-  { id: 'seed-4', teacherId: 'demo-sam', programId: 'demo-literacy', organizationId: 'demo-pathways', attendees: 12, sessionMinutes: 60, body: '12 1' },
-  { id: 'seed-5', teacherId: 'demo-robin', programId: 'demo-wellbeing', organizationId: 'demo-community', attendees: 22, sessionMinutes: 90, body: '22 1.5' },
-  { id: 'seed-6', teacherId: 'demo-maya', programId: 'demo-writing', organizationId: 'demo-arts', attendees: 20, sessionMinutes: 120, body: '20 2' },
-];
-function totals(records: DemoRecord[]): SmsTotals {
-  return records.reduce((sum, record) => ({ sessions: sum.sessions + 1, attendees: sum.attendees + record.attendees, sessionMinutes: sum.sessionMinutes + record.sessionMinutes, participantMinutes: sum.participantMinutes + record.attendees * record.sessionMinutes }), { sessions: 0, attendees: 0, sessionMinutes: 0, participantMinutes: 0 });
-}
+import HelpTip from './HelpTip';
+import { productMessage } from '@/lib/product-copy';
+import { userScrollBehavior } from '@/lib/accessibility';
+import OrganizationOverview from './OrganizationOverview';
+import OrganizationMetrics from './OrganizationMetrics';
 
-/** Intentionally browser-local: no fetch, live session, persistence, or SMS sending. */
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
+import { ArrowRight, CheckCircle2, CircleAlert, Link2, RotateCcw, Send } from 'lucide-react';
+import { parseSmsCommand } from '@/lib/sms';
+import { COURSE_DEMO_STORAGE_KEY, type CourseWorkspace } from '@/lib/course-maintenance';
+import { COURSE_DEMO_CHANGED_EVENT, COURSE_DEMO_PHONES, bindDemoPhone, courseDemoLabel, demoCourseAttendance, demoParticipantEstimate, demoSmsTotals, initialCourseDemoSelection, latestDemoRepeatBaseline, readCourseDemo, resetCourseDemo, simulateCourseSms, updateCourseDemo } from '@/lib/course-sms-demo';
+import { smsNumber } from './SmsDashboard';
+
+/** Shared browser-local rehearsal only. No live requests, real contacts, or SMS delivery. */
 export default function SmsDemo() {
-  const [records, setRecords] = useState(seedRecords);
-  const [teacherId, setTeacherId] = useState(teachers[0].id);
-  const [organizationId, setOrganizationId] = useState(organizations[0].id);
+  const [workspace, setWorkspace] = useState<CourseWorkspace | null>(null);
+  const [courseId, setCourseId] = useState('');
+  const [phoneId, setPhoneId] = useState<string>(COURSE_DEMO_PHONES[0].id);
+  const [bindingCourseId, setBindingCourseId] = useState('');
+  const [organizationId, setOrganizationId] = useState('');
   const [body, setBody] = useState('20 2');
   const [feedback, setFeedback] = useState('');
-  const [isError, setIsError] = useState(false);
-  const [quarantined, setQuarantined] = useState(0);
-  const [lastEvent, setLastEvent] = useState<DemoRecord | null>(null);
-  const sequence = useRef(0);
-  const teacher = teachers.find(item => item.id === teacherId);
-  const program = programs.find(item => item.id === teacher?.programId);
-  const organization = organizations.find(item => item.id === organizationId)!;
-  const networkTotals = useMemo(() => totals(records), [records]);
-  const organizationTotals = useMemo(() => totals(records.filter(record => record.organizationId === organizationId)), [records, organizationId]);
-  const organizationPrograms = programs.filter(item => item.organizationId === organizationId);
-  const orgRows = organizations.map(item => ({ ...item, totals: totals(records.filter(record => record.organizationId === item.id)) }));
-  const maxVisits = Math.max(1, ...orgRows.map(item => item.totals.attendees));
-  const parsedPreview = parseSms(body);
-  function simulate(event: FormEvent) {
-    event.preventDefault();
-    const parsed = parseSms(body);
-    if (!parsed.ok || !teacher || !program) {
-      setQuarantined(count => count + 1); setIsError(true);
-      setFeedback(!parsed.ok ? `Quarantined locally: ${parsed.reason} Neither dashboard changed.` : 'Quarantined locally: this phone is not registered. Neither dashboard changed.');
-      return;
+  const [error, setError] = useState('');
+  const [feedbackPlace, setFeedbackPlace] = useState<'page' | 'binding' | 'sms'>('page');
+  const feedbackRef = useRef<HTMLDivElement>(null);
+  const feedbackRequested = useRef(false);
+  const [feedbackAttempt, setFeedbackAttempt] = useState(0);
+  useEffect(() => {
+    if ((!error && !feedback) || !feedbackRequested.current) return;
+    const frame = window.requestAnimationFrame(() => {
+      if (!feedbackRequested.current) return;
+      feedbackRequested.current = false;
+      if (error) feedbackRef.current?.focus({ preventScroll: true });
+      feedbackRef.current?.scrollIntoView({ block: 'nearest', behavior: userScrollBehavior() });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [error, feedback, feedbackAttempt]);
+  const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const busyRef = useRef(false);
+  const requestedCourse = useRef('');
+  const install = useCallback((next: CourseWorkspace) => {
+    const fallback = next.summaries.find(item => item.id === requestedCourse.current) ?? next.summaries.find(item => item.status === 'in-progress') ?? next.summaries[0];
+    setWorkspace(next);
+    setCourseId(current => next.summaries.some(item => item.id === current) ? current : fallback?.id ?? '');
+    setBindingCourseId(current => next.summaries.some(item => item.id === current) ? current : '');
+    setOrganizationId(current => next.organizations.some(item => item.id === current) ? current : fallback?.organizationId ?? next.organizations[0]?.id ?? '');
+  }, []);
+  useEffect(() => {
+    let alive = true;
+    requestedCourse.current = new URLSearchParams(window.location.search).get('courseId') ?? '';
+    const reload = () => { try { install(readCourseDemo(window.localStorage)); } catch (err) { setError(err instanceof Error ? productMessage(err.message) : 'Browser storage is unavailable.'); } };
+    async function initialize() {
+      try {
+        const next = window.localStorage.getItem(COURSE_DEMO_STORAGE_KEY) ? readCourseDemo(window.localStorage) : await updateCourseDemo(latest => latest);
+        if (alive) {
+          install(next);
+          const initial = initialCourseDemoSelection(next, COURSE_DEMO_PHONES[0].id, requestedCourse.current);
+          setCourseId(initial.courseId); setBindingCourseId(initial.bindingCourseId); const requestedOrg = new URLSearchParams(window.location.search).get('organizationId'); setOrganizationId(next.organizations.some(item => item.id === requestedOrg) ? requestedOrg! : initial.organizationId);
+        }
+      } catch (err) { if (alive) setError(err instanceof Error ? productMessage(err.message) : 'Browser storage is unavailable.'); }
+      finally { if (alive) setLoading(false); }
     }
-    sequence.current += 1;
-    const record: DemoRecord = { id: `local-${sequence.current}`, teacherId: teacher.id, programId: program.id, organizationId: program.organizationId, body: body.trim(), ...parsed.metrics };
-    setRecords(current => [...current, record]); setOrganizationId(program.organizationId); setLastEvent(record); setIsError(false);
-    setFeedback(`Check-in accepted locally. Both dashboards gained ${smsNumber(parsed.metrics.attendees)} participant visits and ${smsNumber(parsed.metrics.sessionMinutes / 60)} session hours.`);
+    const changed = (event: StorageEvent) => {
+      if (event.key !== COURSE_DEMO_STORAGE_KEY && event.key !== null) return;
+      reload(); setFeedbackPlace('page'); setFeedback('The shared synthetic workspace was updated in another tab.');
+    };
+    void initialize();
+    window.addEventListener('storage', changed); window.addEventListener(COURSE_DEMO_CHANGED_EVENT, reload);
+    return () => { alive = false; window.removeEventListener('storage', changed); window.removeEventListener(COURSE_DEMO_CHANGED_EVENT, reload); };
+  }, [install]);
+  async function mutate(work: (latest: CourseWorkspace) => CourseWorkspace, after: (next: CourseWorkspace) => void, reset = false) {
+    if (busyRef.current) return;
+    busyRef.current = true; setBusy(true); setFeedback(''); setError('');
+    try { const next = reset ? await resetCourseDemo() : await updateCourseDemo(work); install(next); after(next); }
+    catch (err) { setError(err instanceof Error ? productMessage(err.message) : 'Check browser storage and save again. Existing work stays unchanged.'); }
+    finally { busyRef.current = false; setBusy(false); }
   }
-  function reset() { setRecords(seedRecords); setQuarantined(0); setLastEvent(null); setFeedback('Synthetic data reset to the starting sample.'); setIsError(false); }
-  return <div className="sms-content sms-demo-content">
-    <div className="sms-demo-banner"><FlaskConical size={18}/><span><b>Synthetic demo.</b> All names, phone numbers, and totals are fictional. Runs only in this browser. No text is sent and no live record is created.</span></div>
-    <div className="sms-heading"><div><span className="sms-kicker">THE TWO-SCREEN MOMENT</span><h1>One text. Two dashboards.</h1><p>Try a teacher’s check-in and watch their organization and the whole TPW network update together.</p></div><button className="sms-button sms-secondary" onClick={reset}><RotateCcw size={15}/> Reset demo</button></div>
-    <section className="sms-demo-console"><div className="sms-demo-phone"><span className="sms-phone-symbol"><Smartphone size={26}/></span><div><span className="sms-kicker">PRETEND YOU’RE THE TEACHER</span><h2>Session finished? Send two numbers.</h2><p>All demo teachers text one fictional number: <b>+1 202-555-0199</b></p></div></div><form onSubmit={simulate} className="sms-simulator-form"><label className="sms-field">From<select value={teacherId} onChange={event => { const id = event.target.value; setTeacherId(id); const selectedTeacher = teachers.find(item => item.id === id); const selectedProgram = programs.find(item => item.id === selectedTeacher?.programId); if (selectedProgram) setOrganizationId(selectedProgram.organizationId); }}>{teachers.map(item => <option value={item.id} key={item.id}>{item.name}</option>)}<option value="unknown">Unregistered demo phone</option></select></label><label className="sms-field">SMS message<input value={body} onChange={event => setBody(event.target.value)} maxLength={1600} placeholder="20 2" required aria-describedby="sms-demo-format"/></label><button type="submit" className="sms-button sms-primary"><Send size={16}/> Simulate check-in</button></form><div className="sms-demo-preview" id="sms-demo-format"><span>{teacher?.phone || '+12025550199'} <ArrowRight size={12}/> {program ? `${organizations.find(item => item.id === program.organizationId)?.name} / ${program.name}` : 'No registered mapping'}</span><span>{parsedPreview.ok ? `${smsNumber(parsedPreview.metrics.attendees)} attendees × ${smsNumber(parsedPreview.metrics.sessionMinutes / 60)} hours` : 'Format: attendees hours, e.g. 20 2 or 12 1.5'}</span></div></section>
-    {feedback && <div className={`sms-feedback ${isError ? 'sms-error' : 'sms-success'}`} role="status">{isError ? <CircleAlert size={18}/> : <CheckCircle2 size={18}/>}<span>{feedback}</span></div>}
-    <div className="sms-demo-screens">
-      <section className="sms-demo-screen"><div className="sms-screen-top"><span><span className="sms-screen-dot"/> SCREEN 01</span><span>SYNTHETIC · TPW NETWORK</span></div><div className="sms-screen-inner"><div className="sms-screen-heading"><div><span className="sms-kicker">ALL ORGANIZATIONS, TOGETHER</span><h2>The whole picture.</h2></div><Radio size={22}/></div><SmsMetrics totals={networkTotals} compact/>
-        <div className="sms-screen-section-heading"><h3>Partner organizations</h3><span>Participant visits</span></div><div className="sms-demo-orgs">{orgRows.map((item, index) => <button className={`sms-demo-org${item.id === organizationId ? ' sms-selected' : ''}`} key={item.id} onClick={() => setOrganizationId(item.id)}><span className={`sms-org-avatar sms-avatar-${index}`}>{item.initials}</span><div><b>{item.name}</b><div className="sms-progress-track"><span style={{ width: `${item.totals.attendees / maxVisits * 100}%` }}/></div></div><strong>{smsNumber(item.totals.attendees)}</strong></button>)}</div>
-      </div><div className="sms-screen-footer"><ShieldCheck size={13}/> Aggregate participation only · No phone numbers</div></section>
-      <section className="sms-demo-screen sms-screen-organization"><div className="sms-screen-top"><span><span className="sms-screen-dot"/> SCREEN 02</span><span>SYNTHETIC · ORGANIZATION</span></div><div className="sms-screen-inner"><div className="sms-screen-heading"><div><span className="sms-kicker">YOUR ORGANIZATION’S PICTURE</span><h2>{organization.name}</h2></div><span className="sms-org-avatar">{organization.initials}</span></div><SmsMetrics totals={organizationTotals} compact/>
-        <div className="sms-screen-section-heading"><h3>Programs</h3><span>Participant visits</span></div><div className="sms-demo-programs">{organizationPrograms.map(item => { const metrics = totals(records.filter(record => record.programId === item.id)); return <div key={item.id}><span><b>{item.name}</b><small>{smsNumber(metrics.sessions)} sessions · {smsNumber(metrics.sessionMinutes / 60)} session hours</small></span><strong>{smsNumber(metrics.attendees)}</strong></div>; })}</div>
-        <div className="sms-demo-last-event"><MessageSquare size={17}/><div><b>{lastEvent?.organizationId === organizationId ? 'A new check-in just landed.' : 'Connected to the shared picture.'}</b><p>{lastEvent?.organizationId === organizationId ? `${programs.find(item => item.id === lastEvent.programId)?.name} · +${smsNumber(lastEvent.attendees)} visits · +${smsNumber(lastEvent.sessionMinutes / 60)} session h` : 'Pick a teacher above and simulate a text to see this organization update.'}</p></div></div>
-      </div><div className="sms-screen-footer"><ShieldCheck size={13}/> Repeat attendance counts as a new visit, not a unique person</div></section>
-    </div>
-    <div className="sms-demo-flow"><span><span>01</span> A teacher texts <b>20 2</b></span><ArrowRight size={17}/><span><span>02</span> Their phone identifies the program</span><ArrowRight size={17}/><span><span>03</span> Both dashboards update</span></div>
-    <section className="sms-report-invite"><div><span className="sms-kicker">THE NEXT CHAPTER</span><h2>Turn recorded activity into a story.</h2><p>Explore weekly trends and a one-page brief with a separate, clearly fictional sample.</p></div><a className="sms-button sms-primary" href="/sms/demo/reports">Try the reporting demo <ArrowUpRight size={15}/></a></section>
-    <div className="sms-demo-bottom"><p><b>No model needed.</b> A fixed format, registered phone mappings, and arithmetic. {quarantined > 0 && `${quarantined} local test ${quarantined === 1 ? 'message is' : 'messages are'} quarantined and excluded from totals.`} Quarter-hour durations are accepted, from 0.25 to 24 hours. These are participation measures, not outcome or recidivism claims.</p><a className="sms-button sms-secondary" href="/sms">Open the real SMS workspace <ArrowUpRight size={15}/></a></div>
+  function saveBinding(event: FormEvent) {
+    event.preventDefault(); setFeedbackPlace('binding'); feedbackRequested.current = true; setFeedbackAttempt(value => value + 1);
+    void mutate(latest => bindDemoPhone(latest, phoneId, bindingCourseId || null), next => {
+      const course = next.summaries.find(item => item.id === bindingCourseId);
+      if (course) { setCourseId(course.id); setOrganizationId(course.organizationId); }
+      setFeedback(course ? 'Demo phone saved to this program.' : 'Choose a program before the next demo check-in.');
+    });
+  }
+  function simulate(event: FormEvent) {
+    event.preventDefault(); if (busyRef.current) return;
+    setFeedbackPlace('sms'); feedbackRequested.current = true; setFeedbackAttempt(value => value + 1);
+    const id = crypto.randomUUID();
+    const result = { reason: null as string | null };
+    void mutate(latest => { const outcome = simulateCourseSms(latest, phoneId, body, id); result.reason = outcome.reason; return outcome.workspace; }, next => {
+      const record = next.sms?.records.find(item => item.id === id);
+      if (!record) { setError(`Review this demo message: ${productMessage(result.reason || 'Save a program for this phone first.')} Program, organization and TPW totals stay unchanged.`); return; }
+      setCourseId(record.courseId); setOrganizationId(record.courseSnapshot.organizationId);
+      setFeedback(`Demo check-in saved: ${smsNumber(record.attendees)} attendees, ${smsNumber(record.sessionMinutes / 60)} session hours. The program line and totals are updated.`);
+    });
+  }
+  function reset() {
+    if (busyRef.current || !window.confirm('Reset the shared synthetic workspace? This removes demo program edits, fictional phone bindings and simulated check-ins in every open demo tab. Live records are untouched.')) return;
+    setFeedbackPlace('page'); feedbackRequested.current = true; setFeedbackAttempt(value => value + 1);
+    void mutate(latest => latest, next => {
+      const first = next.summaries.find(item => item.status === 'in-progress') ?? next.summaries[0];
+      setCourseId(first?.id ?? ''); setBindingCourseId(first?.id ?? ''); setOrganizationId(first?.organizationId ?? ''); setPhoneId(COURSE_DEMO_PHONES[0].id); setBody('20 2');
+      setFeedback('Shared synthetic programs, phone bindings and check-ins reset. Live records stay unchanged.');
+    }, true);
+  }
+  useEffect(() => { if (!organizationId) return; const url = new URL(window.location.href); url.searchParams.set('organizationId', organizationId); window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`); window.dispatchEvent(new Event('impactlens:demo-organization')); }, [organizationId]);
+  const records = workspace?.sms?.records ?? [];
+  const binding = workspace?.sms?.bindings.find(item => item.phoneId === phoneId);
+  const boundCourse = workspace?.summaries.find(item => item.id === binding?.courseId);
+  const phone = COURSE_DEMO_PHONES.find(item => item.id === phoneId);
+  const selectedOrganization = workspace?.organizations.find(item => item.id === organizationId);
+  const parsed = parseSmsCommand(body);
+  const repeatBaseline = workspace ? latestDemoRepeatBaseline(workspace, phoneId) : null;
+  const organizationTotals = demoSmsTotals(records.filter(item => item.courseSnapshot.organizationId === organizationId));
+  const attendance = workspace ? workspace.summaries.filter(course => course.organizationId === organizationId).map(course => demoCourseAttendance(workspace, course.id)!) : [];
+  const feedbackMessage = (error || feedback) && <div className={`sms-feedback ${error ? 'sms-error' : 'sms-success'}`} role={error ? 'alert' : 'status'} tabIndex={-1} ref={feedbackRef}>{error ? <CircleAlert size={18}/> : <CheckCircle2 size={18}/>}<span>{error || feedback}</span></div>;
+  return <div className="sms-content sms-demo-content org-content">
+    <div className="org-demo-badge">Synthetic demo<HelpTip label="Synthetic demo" text="Fictional data and phone choices, saved only in this browser. Live records stay unchanged."/></div>
+    {(feedbackPlace === 'page' || !workspace) && feedbackMessage}
+    {loading ? <section className="sms-panel sms-demo-loading">Loading demo…</section> : !workspace ? <section className="sms-panel sms-demo-loading"><h1>Reopen your saved demo.</h1><p>Check browser storage or reset the demo.</p><button type="button" className="sms-button sms-secondary" onClick={reset} disabled={busy}>Reset demo</button></section> : <>
+      <div className="org-heading"><h1>{selectedOrganization?.name || 'Organization dashboard'}</h1><label className="sms-field">Organization<select value={organizationId} onChange={event => setOrganizationId(event.target.value)}>{workspace.organizations.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label></div>
+      <OrganizationMetrics totals={organizationTotals} participantEstimate={demoParticipantEstimate(workspace, organizationId)}/>
+      <RacMetrics participantMinutes={organizationTotals.participantMinutes}/>
+      <OrganizationOverview organizationId={organizationId} attendance={attendance} synthetic/>
+      <details className="org-demo-tools"><summary>Try a check-in</summary>
+      <section className="sms-demo-console">
+        <div className="sms-demo-phone"><div><h2>Try a check-in</h2><p><b>20 2</b> = 20 attendees, 2 session hours. <b>1</b> = repeat this phone’s last counted values for this program as a new session.<HelpTip label="Repeating a check-in" text="Send two numbers first. Each new text containing only 1 adds another session with this phone’s latest counted attendance and hours for its current program. If attendance or hours changed, send two numbers instead. Start with two numbers to establish the first check-in."/></p></div></div>
+        <div className="sms-rehearsal-binding"><div><Link2 size={17}/><h3>Choose a program for this phone.</h3></div><p>Save the phone’s program before trying a text.<HelpTip label="Phone-to-program binding" text="This setup connects future check-ins from the fictional phone to one saved program. Earlier check-ins keep their original program."/></p>
+          <form onSubmit={saveBinding} className="sms-binding-form"><label className="sms-field">Fictional sender<select value={phoneId} onChange={event => { const id = event.target.value; setPhoneId(id); setBindingCourseId(workspace.sms?.bindings.find(item => item.phoneId === id)?.courseId ?? courseId); }} disabled={busy}>{COURSE_DEMO_PHONES.map(item => <option key={item.id} value={item.id}>{item.name} · {item.phone}</option>)}<option value="unknown">Unregistered fictional phone</option></select></label><label className="sms-field">Program for this phone<select value={bindingCourseId} onChange={event => setBindingCourseId(event.target.value)} disabled={busy || !phone}><option value="">Choose a program</option>{workspace.summaries.map(course => <option key={course.id} value={course.id}>{course.organizationName} / {courseDemoLabel(course)}</option>)}</select></label><button className="sms-button sms-secondary" type="submit" disabled={busy || !phone}>{busy ? 'Saving…' : 'Save phone’s program'}<CheckCircle2 size={15}/></button></form>
+          <p className="sms-binding-status"><b>Saved program:</b> {boundCourse ? courseDemoLabel(boundCourse) : 'Choose and save a program for this phone to begin.'}{phone && (binding?.courseId ?? '') !== bindingCourseId && <strong> Save the selection above to use it.</strong>}</p>
+          {feedbackPlace === 'binding' && feedbackMessage}
+        </div>
+        <form onSubmit={simulate} className="sms-simulator-form sms-course-simulator"><label className="sms-field">SMS message<input value={body} onChange={event => setBody(event.target.value)} maxLength={1600} placeholder="20 2" required disabled={busy} aria-describedby="sms-demo-format"/></label><div className="sms-demo-examples"><span>Try another session</span>{['18 1.5', '24 2', '0 0.25', '1'].map(example => <button type="button" key={example} onClick={() => setBody(example)} disabled={busy}>{example}</button>)}</div><button type="submit" className="sms-button sms-primary" disabled={busy}><Send size={16}/>{busy ? 'Saving…' : 'Simulate check-in'}</button></form>
+        <div className="sms-demo-preview" id="sms-demo-format"><span>{phone?.phone || 'Unregistered fictional phone'} <ArrowRight size={12}/>{boundCourse ? boundCourse.programName : 'Choose a program'}</span><span>{parsed.ok ? parsed.kind === 'numeric' ? `${smsNumber(parsed.metrics.attendees)} attendees × ${smsNumber(parsed.metrics.sessionMinutes / 60)} session hours` : repeatBaseline ? `New session: repeat ${smsNumber(repeatBaseline.attendees)} attendees × ${smsNumber(repeatBaseline.sessionMinutes / 60)} session hours` : 'Send two numbers first for this phone and program.' : 'Format: attendees hours, e.g. 20 2; or 1 to repeat.'}</span></div>
+        {feedbackPlace === 'sms' && feedbackMessage}
+      </section>
+        <div className="org-demo-actions"><button type="button" className="sms-button sms-secondary" onClick={reset} disabled={busy}><RotateCcw size={15}/>Reset demo</button></div>
+      </details>
+    </>}
   </div>;
 }

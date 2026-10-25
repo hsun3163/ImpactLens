@@ -29,7 +29,7 @@ function fixture() {
       async run() { const result = sqlite.prepare(sql).run(...values); return { success: true, results: [], meta: { changes: Number(result.changes) } }; },
     }; return statement;
   };
-  const env: SmsRuntime = { DB: { prepare } as unknown as D1Database, TPW_ADMIN_USER_IDS: 'tpw-admin' };
+  const env: SmsRuntime = { DB: { prepare, async batch(statements: ReturnType<typeof prepare>[]) { sqlite.exec('BEGIN'); try { const results = []; for (const statement of statements) results.push(await statement.all()); sqlite.exec('COMMIT'); return results; } catch (error) { sqlite.exec('ROLLBACK'); throw error; } } } as unknown as D1Database, TPW_ADMIN_USER_IDS: 'tpw-admin' };
   for (const [id, name, slug, active] of [[organizationId, 'Synthetic organization', 'stable-url-slug', 0], [otherOrganizationId, 'Other organization', 'other-org', 1]]) {
     sqlite.prepare('INSERT INTO sms_organizations(id,name,slug,active,created_at,updated_at) VALUES(?,?,?,?,?,?)').run(id, name, slug, active, '2026-01-01', '2026-01-01');
   }

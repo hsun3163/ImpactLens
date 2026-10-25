@@ -12,15 +12,22 @@ test('facility vocabulary and status labels match the audited existing source', 
   assert.equal(CDCR_FACILITIES[30], 'Wasco State Prison (WSP)');
   assert.deepEqual(Object.values(COURSE_SUMMARY_STATUS_LABELS), ['Planned', 'In Progress', 'Completed']);
 });
-test('new course reuses only organization, program and site, not historical values', () => {
+test('new course reuses context and editable participant/hour defaults but not prior completion results', () => {
   const source = createCourseDemo().summaries.find(item => item.status === 'completed')!;
   const next = anotherCourseDraft(source);
   assert.equal(next.organizationId, source.organizationId); assert.equal(next.programId, source.programId);
   assert.equal(next.facility, source.facility); assert.equal(next.yard, source.yard ?? '');
   assert.equal(next.status, 'planned'); assert.equal(next.revision, 0); assert.equal(next.id, '');
-  for (const key of ['startDate', 'endDate', 'courseHoursPerParticipant', 'participants', 'completers', 'notes'] as const) assert.equal(next[key], '');
+  for (const key of ['startDate', 'endDate', 'completers', 'notes'] as const) assert.equal(next[key], '');
+  assert.equal(next.participants, String(source.participants)); assert.equal(next.courseHoursPerParticipant, String(source.courseHoursPerParticipant));
   const write = maintenanceDraftToWrite(next, randomUUID());
-  for (const key of ['startDate', 'endDate', 'courseHoursPerParticipant', 'participants', 'completers', 'notes'] as const) assert.equal(write[key], null);
+  for (const key of ['startDate', 'endDate', 'completers', 'notes'] as const) assert.equal(write[key], null);
+  assert.equal(write.participants, source.participants); assert.equal(write.courseHoursPerParticipant, source.courseHoursPerParticipant);
+  assert.equal(courseDerivedValues(write).completedParticipantHours, null);
+  const zero = anotherCourseDraft({ ...source, participants: 0, courseHoursPerParticipant: 0 });
+  assert.equal(zero.participants, '0'); assert.equal(zero.courseHoursPerParticipant, '0');
+  const unknown = anotherCourseDraft({ ...source, participants: null, courseHoursPerParticipant: null });
+  assert.equal(unknown.participants, ''); assert.equal(unknown.courseHoursPerParticipant, '');
 });
 test('source facility choices are enforced without silently migrating legacy values', () => {
   const source = createCourseDemo().summaries[0]; const draft = courseSummaryToDraft(source);
@@ -63,8 +70,8 @@ test('demo is browser-local and course UI never reads raw admin messages or requ
   assert.doesNotMatch(source, /\/api\/sms\/(?:admin|dashboard|inbound|report)/);
   assert.doesNotMatch(source, /senderPhone|teacherId|TWILIO|sms_records|sms_aggregates|webhookConfigured/);
   assert.match(source, /if \(demo\) \{[\s\S]*?localStorage[\s\S]*?return;[\s\S]*?\/api\/sms\/session/);
-  assert.match(source, /My courses/); assert.match(source, /Add another like this/); assert.match(source, /cm-inline-program/);
-  assert.match(source, /No phone number or SMS setup needed/);
+  assert.match(source, /Manage programs/); assert.match(source, /Add another like this/); assert.match(source, /cm-inline-program/);
+  assert.match(source, /Program Hours \(per Participant\)/);
   assert.match(readFileSync('src/app/demo/courses/page.tsx', 'utf8'), /CourseMaintenance demo/);
 });
 

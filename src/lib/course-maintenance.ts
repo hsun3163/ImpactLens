@@ -39,7 +39,10 @@ export const CDCR_FACILITIES = [
 ] as const;
 export type CourseOrganization = { id: string; name: string; active: boolean };
 export type CourseProgram = CourseOrganization & { organizationId: string };
-export type CourseWorkspace = { organizations: CourseOrganization[]; programs: CourseProgram[]; summaries: CourseSummary[] };
+export type DemoCourseSnapshot = Pick<CourseSummary, 'id' | 'organizationId' | 'programId' | 'organizationName' | 'programName' | 'facility' | 'yard' | 'startDate' | 'endDate'>;
+export type DemoCourseSmsRecord = { id: string; phoneId?: string; repeatedFromRecordId?: string; courseId: string; receivedAt: string; processedAt: string; attendees: number; sessionMinutes: number; participantMinutes: number; courseSnapshot: DemoCourseSnapshot };
+export type DemoCourseSms = { version: 1; bindings: { phoneId: string; courseId: string }[]; records: DemoCourseSmsRecord[]; quarantined: number };
+export type CourseWorkspace = { organizations: CourseOrganization[]; programs: CourseProgram[]; summaries: CourseSummary[]; demoGeneration?: string; sms?: DemoCourseSms };
 export type CourseMetadataWrite = { action: 'organization' | 'program'; id?: string; createId?: string; organizationId?: string; name: string };
 export const COURSE_DEMO_STORAGE_KEY = 'impactlens.course-maintenance.demo.v1';
 
@@ -47,9 +50,10 @@ export function newCourseDraft(organizationId: string, programId: string, contex
   return { id: '', revision: 0, organizationId, programId, facility: context?.facility ?? '', yard: context?.yard ?? '',
     status: 'planned', startDate: '', endDate: '', courseHoursPerParticipant: '', participants: '', completers: '', notes: '' };
 }
-/** Reuse context, never the previous run's dates, result counts, hours or notes. */
+/** Reuse context and editable planning defaults, never prior dates, completions or notes. */
 export function anotherCourseDraft(summary: CourseSummary): CourseSummaryDraft {
-  return newCourseDraft(summary.organizationId, summary.programId, summary);
+  return { ...newCourseDraft(summary.organizationId, summary.programId, summary),
+    courseHoursPerParticipant: summary.courseHoursPerParticipant?.toString() ?? '', participants: summary.participants?.toString() ?? '' };
 }
 export function maintenanceDraftToWrite(draft: CourseSummaryDraft, id: string, original?: CourseSummary): CourseSummaryWrite {
   const facility = draft.facility.trim();
@@ -69,6 +73,7 @@ export function applyDemoCourseSave(workspace: CourseWorkspace, write: CourseSum
   const program = workspace.programs.find(item => item.id === input.programId && item.organizationId === input.organizationId);
   if (!organization || !program) throw new Error('Choose a saved organization and program.');
   const current = workspace.summaries.find(item => item.id === input.id);
+  if (current && (current.organizationId !== input.organizationId || current.programId !== input.programId) && (workspace.sms?.bindings.some(item => item.courseId === current.id) || workspace.sms?.records.some(item => item.courseId === current.id))) throw new Error('This course has a phone binding or check-in history. Add a separate course to use another program or organization.');
   if ((current?.revision ?? 0) !== input.revision) throw new Error('This course changed. Reopen its saved version before editing.');
   const saved: CourseSummary = { ...input, revision: input.revision + 1, organizationName: organization.name, programName: program.name,
     source: COURSE_SUMMARY_SOURCE, createdAt: current?.createdAt ?? now, updatedAt: now };
@@ -100,6 +105,7 @@ export function createCourseDemo(): CourseWorkspace {
   const secondProgramId = '72000000-0000-4000-8000-000000000002';
   const otherProgramId = '72000000-0000-4000-8000-000000000003';
   let workspace: CourseWorkspace = {
+    demoGeneration: crypto.randomUUID(),
     organizations: [{ id: organizationId, name: 'Demo Learning Collective', active: true }, { id: otherOrganizationId, name: 'Demo Community Arts', active: true }],
     programs: [{ id: programId, organizationId, name: 'Resilience Workshop', active: true }, { id: secondProgramId, organizationId, name: 'Peer Learning', active: true }, { id: otherProgramId, organizationId: otherOrganizationId, name: 'Creative Practice', active: true }], summaries: [],
   };
@@ -112,11 +118,17 @@ export function createCourseDemo(): CourseWorkspace {
   for (const item of seed) workspace = applyDemoCourseSave(workspace, item, '2026-10-24T12:00:00.000Z');
   return workspace;
 }
-export function serializeCourseDemo(workspace: CourseWorkspace): string { return JSON.stringify({ version: 1, workspace }); }
+/** Saved yard labels are reusable only within the same organization and facility. */
+export function savedCourseYards(workspace: CourseWorkspace, organizationId: string, facility: string): string[] {
+  return [...new Set(workspace.summaries.filter(item => item.organizationId === organizationId && (item.facility ?? '') === facility.trim())
+    .map(item => item.yard?.trim() ?? '').filter(Boolean))].sort((a, b) => a.localeCompare(b));
+}
+export function serializeCourseDemo(workspace: CourseWorkspace): string { return JSON.stringify({ version: 2, workspace }); }
 export function parseCourseDemo(serialized: string): CourseWorkspace {
   const value = JSON.parse(serialized);
-  if (value?.version !== 1 || !value.workspace || !Array.isArray(value.workspace.organizations) || !Array.isArray(value.workspace.programs) || !Array.isArray(value.workspace.summaries)) throw new Error('Saved demo data could not be read.');
+  if (![1, 2].includes(value?.version) || !value.workspace || !Array.isArray(value.workspace.organizations) || !Array.isArray(value.workspace.programs) || !Array.isArray(value.workspace.summaries)) throw new Error('Saved demo data could not be read.');
   const workspace = value.workspace as CourseWorkspace;
+  if (workspace.demoGeneration !== undefined && (typeof workspace.demoGeneration !== 'string' || !workspace.demoGeneration)) throw new Error('Saved demo data could not be read.');
   for (const item of [...workspace.organizations, ...workspace.programs]) {
     if (typeof item.id !== 'string' || typeof item.name !== 'string' || !item.name.trim() || item.name.length > 100 || typeof item.active !== 'boolean') throw new Error('Saved demo data could not be read.');
   }
@@ -124,6 +136,40 @@ export function parseCourseDemo(serialized: string): CourseWorkspace {
   for (const summary of workspace.summaries) {
     courseSummaryDraftToWrite(courseSummaryToDraft(summary));
     if (!workspace.programs.some(program => program.id === summary.programId && program.organizationId === summary.organizationId) || summary.revision < 1) throw new Error('Saved demo data could not be read.');
+  }
+  if (workspace.sms !== undefined) {
+    const sms = workspace.sms;
+    const invalid = () => { throw new Error('Saved SMS rehearsal data could not be read.'); };
+    if (!sms || sms.version !== 1 || !Array.isArray(sms.bindings) || !Array.isArray(sms.records) || !Number.isSafeInteger(sms.quarantined) || sms.quarantined < 0) invalid();
+    const phoneIds = new Set<string>();
+    for (const binding of sms.bindings) {
+      if (!binding || !['fictional-01', 'fictional-02', 'fictional-03'].includes(binding.phoneId) || phoneIds.has(binding.phoneId) || !workspace.summaries.some(item => item.id === binding.courseId)) invalid();
+      phoneIds.add(binding.phoneId);
+    }
+    const recordIds = new Set<string>();
+    for (const record of sms.records) {
+      if (!record || typeof record.id !== 'string' || !record.id || recordIds.has(record.id) || !workspace.summaries.some(item => item.id === record.courseId)
+        || typeof record.receivedAt !== 'string' || !Number.isFinite(Date.parse(record.receivedAt)) || typeof record.processedAt !== 'string' || !Number.isFinite(Date.parse(record.processedAt))
+        || !Number.isSafeInteger(record.attendees) || record.attendees < 0 || record.attendees > 10000 || !Number.isSafeInteger(record.sessionMinutes)
+        || record.sessionMinutes < 15 || record.sessionMinutes > 1440 || record.sessionMinutes % 15 !== 0 || record.participantMinutes !== record.attendees * record.sessionMinutes) invalid();
+      if (record.phoneId !== undefined && !['fictional-01', 'fictional-02', 'fictional-03'].includes(record.phoneId)) invalid();
+      if (record.repeatedFromRecordId !== undefined && (typeof record.repeatedFromRecordId !== 'string' || !record.repeatedFromRecordId || record.repeatedFromRecordId === record.id || !record.phoneId)) invalid();
+      recordIds.add(record.id);
+      const snapshot = record.courseSnapshot;
+      if (!snapshot || snapshot.id !== record.courseId || typeof snapshot.organizationId !== 'string' || typeof snapshot.programId !== 'string'
+        || typeof snapshot.organizationName !== 'string' || typeof snapshot.programName !== 'string'
+        || !workspace.organizations.some(item => item.id === snapshot.organizationId)
+        || !workspace.programs.some(item => item.id === snapshot.programId && item.organizationId === snapshot.organizationId)) invalid();
+      for (const key of ['facility', 'yard', 'startDate', 'endDate'] as const) if (snapshot[key] !== null && typeof snapshot[key] !== 'string') invalid();
+    }
+  }
+  if (workspace.sms) for (const record of workspace.sms.records) {
+    if (!record.repeatedFromRecordId) continue;
+    const sourceIndex = workspace.sms.records.findIndex(item => item.id === record.repeatedFromRecordId);
+    const source = workspace.sms.records[sourceIndex];
+    if (!source || sourceIndex >= workspace.sms.records.indexOf(record) || source.phoneId !== record.phoneId || source.courseId !== record.courseId
+      || source.courseSnapshot.organizationId !== record.courseSnapshot.organizationId || source.courseSnapshot.programId !== record.courseSnapshot.programId
+      || source.attendees !== record.attendees || source.sessionMinutes !== record.sessionMinutes) throw new Error('Saved SMS repeat source could not be read.');
   }
   return workspace;
 }

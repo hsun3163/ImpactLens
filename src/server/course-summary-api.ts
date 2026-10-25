@@ -1,3 +1,5 @@
+import { courseServiceEstimate } from '../lib/course-estimate';
+import { COURSE_HAS_PHONE_BINDING, courseEstimateStatement, courseEstimateGroups } from './course-estimate-api';
 import {
   COURSE_SUMMARY_LIMIT, COURSE_SUMMARY_SOURCE, CourseSummaryError,
   courseSummaryId, sameCourseSummaryValues, validateCourseSummary,
@@ -39,10 +41,11 @@ function view(row: Row): CourseSummary {
     startDate: row.start_date as string | null, endDate: row.end_date as string | null,
     courseHoursPerParticipant: row.course_hours_per_participant === null ? null : Number(row.course_hours_per_participant),
     participants: row.participants === null ? null : Number(row.participants), completers: row.completers === null ? null : Number(row.completers),
+    serviceEstimate: courseServiceEstimate({ participants: row.participants === null ? null : Number(row.participants), courseHoursPerParticipant: row.course_hours_per_participant === null ? null : Number(row.course_hours_per_participant) }, Boolean(row.has_phone_binding)),
     notes: row.notes as string | null, createdAt: String(row.created_at), updatedAt: String(row.updated_at),
   };
 }
-const SELECT = `SELECT s.*, o.name organization_name, p.name program_name FROM course_summaries s
+const SELECT = `SELECT s.*, o.name organization_name, p.name program_name,${COURSE_HAS_PHONE_BINDING} has_phone_binding FROM course_summaries s
   JOIN sms_organizations o ON o.id=s.organization_id JOIN sms_programs p ON p.id=s.program_id`;
 async function getSummary(db: D1Database, id: string): Promise<CourseSummary | null> {
   const row = await db.prepare(SELECT + ' WHERE s.id=?').bind(id).first<Row>();
@@ -56,17 +59,25 @@ async function writeSummary(request: Request, db: D1Database): Promise<Response>
   const summary = validateCourseSummary(await readJson(request));
   const mapping = await db.prepare('SELECT p.id, p.name program_name, o.name organization_name FROM sms_programs p JOIN sms_organizations o ON o.id=p.organization_id WHERE p.id=? AND p.organization_id=?').bind(summary.programId, summary.organizationId).first<Row>();
   if (!mapping) throw new CourseSummaryError(400, 'INVALID_PROGRAM', 'Choose an existing program within the selected organization.');
+  const previous = summary.revision > 0 ? await getSummary(db, summary.id) : null;
+  if (previous && (previous.organizationId !== summary.organizationId || previous.programId !== summary.programId)
+    && await db.prepare('SELECT 1 FROM sms_teachers WHERE course_id=? UNION ALL SELECT 1 FROM sms_records WHERE course_id=? LIMIT 1').bind(summary.id, summary.id).first()) {
+    throw new CourseSummaryError(409, 'COURSE_PARENT_FIXED', 'A course with a phone binding or SMS history stays with its original organization and program. Add another course instead.');
+  }
   const now = new Date().toISOString();
   // Each write is a single atomic SQLite statement. Retrying the same revision and
   // canonical values succeeds without another increment; a competing edit conflicts.
   const changed = summary.revision === 0
     ? await db.prepare(`INSERT INTO course_summaries(id,revision,organization_id,program_id,facility,yard,status,start_date,end_date,course_hours_per_participant,participants,completers,notes,created_at,updated_at)
-        VALUES(?,1,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO NOTHING RETURNING *`).bind(summary.id, ...values(summary), now, now).first<Row>()
+        VALUES(?,1,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO NOTHING RETURNING *, EXISTS (SELECT 1 FROM sms_teachers t WHERE t.course_id=course_summaries.id) has_phone_binding`).bind(summary.id, ...values(summary), now, now).first<Row>()
     : await db.prepare(`UPDATE course_summaries SET revision=revision+1,organization_id=?,program_id=?,facility=?,yard=?,status=?,start_date=?,end_date=?,course_hours_per_participant=?,participants=?,completers=?,notes=?,updated_at=?
-        WHERE id=? AND revision=? RETURNING *`).bind(...values(summary), now, summary.id, summary.revision).first<Row>();
+        WHERE id=? AND revision=? AND ((organization_id=? AND program_id=?) OR
+          (NOT EXISTS(SELECT 1 FROM sms_teachers WHERE course_id=course_summaries.id) AND NOT EXISTS(SELECT 1 FROM sms_records WHERE course_id=course_summaries.id)))
+        RETURNING *, EXISTS (SELECT 1 FROM sms_teachers t WHERE t.course_id=course_summaries.id) has_phone_binding`).bind(...values(summary), now, summary.id, summary.revision, summary.organizationId, summary.programId).first<Row>();
   if (changed) return json({ summary: view({ ...changed, organization_name: mapping.organization_name, program_name: mapping.program_name }), replayed: false }, summary.revision === 0 ? 201 : 200);
   const current = await getSummary(db, summary.id);
   if (current && current.revision === summary.revision + 1 && sameCourseSummaryValues(current, summary)) return json({ summary: current, replayed: true });
+  if (current && (current.organizationId !== summary.organizationId || current.programId !== summary.programId) && await db.prepare('SELECT 1 FROM sms_teachers WHERE course_id=? UNION ALL SELECT 1 FROM sms_records WHERE course_id=? LIMIT 1').bind(summary.id, summary.id).first()) throw new CourseSummaryError(409, 'COURSE_PARENT_FIXED', 'A course with a phone binding or SMS history stays with its original organization and program. Add another course instead.');
   if (!current && summary.revision > 0) throw new CourseSummaryError(404, 'SUMMARY_NOT_FOUND', 'This course summary was not found. Refresh the saved summaries.');
   throw new CourseSummaryError(409, 'REVISION_CONFLICT', 'This course summary changed after you opened it. Your edits were not saved. Reload its latest saved version before editing again.');
 }
@@ -81,11 +92,14 @@ export async function handleCourseSummaries(request: Request, db: D1Database): P
     if ([...url.searchParams.keys()].some(key => key !== 'organizationId') || url.searchParams.getAll('organizationId').length > 1) throw new CourseSummaryError(400, 'INVALID_QUERY', 'Choose one organization filter.');
     const organizationId = url.searchParams.has('organizationId') ? courseSummaryId(url.searchParams.get('organizationId')) : null;
     if (organizationId && !await db.prepare('SELECT id FROM sms_organizations WHERE id=?').bind(organizationId).first()) throw new CourseSummaryError(404, 'ORGANIZATION_NOT_FOUND', 'This organization was not found.');
-    const summaries = await db.prepare(SELECT + (organizationId ? ' WHERE s.organization_id=?' : '') + ' ORDER BY s.updated_at DESC,s.id DESC LIMIT ?').bind(...(organizationId ? [organizationId] : []), COURSE_SUMMARY_LIMIT + 1).all<Row>();
+    const [summaries, estimateRows] = await db.batch<Row>([
+      db.prepare(SELECT + (organizationId ? ' WHERE s.organization_id=?' : '') + ' ORDER BY s.updated_at DESC,s.id DESC LIMIT ?').bind(...(organizationId ? [organizationId] : []), COURSE_SUMMARY_LIMIT + 1),
+      courseEstimateStatement(db, organizationId),
+    ]);
     const organizations = await db.prepare('SELECT id,name,active FROM sms_organizations ORDER BY name,id').all<Row>();
     const programs = await db.prepare('SELECT id,organization_id,name,active FROM sms_programs' + (organizationId ? ' WHERE organization_id=?' : '') + ' ORDER BY name,id').bind(...(organizationId ? [organizationId] : [])).all<Row>();
     return json({ source: COURSE_SUMMARY_SOURCE, generatedAt: new Date().toISOString(), limit: COURSE_SUMMARY_LIMIT, truncated: summaries.results.length > COURSE_SUMMARY_LIMIT,
-      summaries: summaries.results.slice(0, COURSE_SUMMARY_LIMIT).map(view),
+      summaries: summaries.results.slice(0, COURSE_SUMMARY_LIMIT).map(view), serviceEstimate: courseEstimateGroups(estimateRows.results).total,
       organizations: organizations.results.map(row => ({ id: row.id, name: row.name, active: Boolean(row.active) })),
       programs: programs.results.map(row => ({ id: row.id, organizationId: row.organization_id, name: row.name, active: Boolean(row.active) })),
     });

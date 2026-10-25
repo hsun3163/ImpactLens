@@ -27,7 +27,7 @@ function fixture() {
       async run() { const result = sqlite.prepare(sql).run(...values); return { success: true, results: [], meta: { changes: Number(result.changes) } }; },
     }; return statement;
   };
-  const db = { prepare } as unknown as D1Database;
+  const db = { prepare, async batch(statements: ReturnType<typeof prepare>[]) { sqlite.exec('BEGIN'); try { const results = []; for (const statement of statements) results.push(await statement.all()); sqlite.exec('COMMIT'); return results; } catch (error) { sqlite.exec('ROLLBACK'); throw error; } } } as unknown as D1Database;
   sqlite.prepare('INSERT INTO sms_organizations(id,name,slug,created_at,updated_at) VALUES(?,?,?,?,?)').run(organizationId, 'Synthetic organization', 'synthetic-one', '2026-01-01', '2026-01-01');
   sqlite.prepare('INSERT INTO sms_organizations(id,name,slug,created_at,updated_at) VALUES(?,?,?,?,?)').run(otherOrganizationId, 'Other organization', 'synthetic-two', '2026-01-01', '2026-01-01');
   sqlite.prepare('INSERT INTO sms_programs(id,organization_id,name,created_at,updated_at) VALUES(?,?,?,?,?)').run(programId, organizationId, 'Synthetic program', '2026-01-01', '2026-01-01');

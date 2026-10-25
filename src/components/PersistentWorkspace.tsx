@@ -41,7 +41,9 @@ function errorText(error: unknown, fallback: string) { return error instanceof A
 function dateLabel(value: string) { const date = new Date(value); return Number.isNaN(date.getTime()) ? 'Date unavailable' : date.toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }); }
 function safeAuthUrl(value: string | undefined, action: 'signin' | 'signout') {
   const expected = `/${action}-with-chatgpt`;
-  return value && (value === expected || value.startsWith(`${expected}?`)) ? value : `${expected}?return_to=%2F`;
+  const safe = value && (value === expected || value.startsWith(`${expected}?`)) ? new URL(value, 'https://app.local') : new URL(expected, 'https://app.local');
+  safe.searchParams.set('return_to', '/research');
+  return `${safe.pathname}${safe.search}`;
 }
 export function AccountLink({ session }: { session: CloudSession | null }) {
   return session ? <a className="account-link" target="_top" href={safeAuthUrl(session.authenticated ? session.signOutUrl : session.signInUrl, session.authenticated ? 'signout' : 'signin')}><LockKeyhole size={13}/>{session.authenticated ? 'Sign out' : 'Sign in with ChatGPT'}</a> : null;
