@@ -83,7 +83,7 @@ export async function handleCourseSummaries(request: Request, db: D1Database): P
     if (organizationId && !await db.prepare('SELECT id FROM sms_organizations WHERE id=?').bind(organizationId).first()) throw new CourseSummaryError(404, 'ORGANIZATION_NOT_FOUND', 'This organization was not found.');
     const summaries = await db.prepare(SELECT + (organizationId ? ' WHERE s.organization_id=?' : '') + ' ORDER BY s.updated_at DESC,s.id DESC LIMIT ?').bind(...(organizationId ? [organizationId] : []), COURSE_SUMMARY_LIMIT + 1).all<Row>();
     const organizations = await db.prepare('SELECT id,name,active FROM sms_organizations ORDER BY name,id').all<Row>();
-    const programs = await db.prepare('SELECT id,organization_id,name,active FROM sms_programs ORDER BY name,id').all<Row>();
+    const programs = await db.prepare('SELECT id,organization_id,name,active FROM sms_programs' + (organizationId ? ' WHERE organization_id=?' : '') + ' ORDER BY name,id').bind(...(organizationId ? [organizationId] : [])).all<Row>();
     return json({ source: COURSE_SUMMARY_SOURCE, generatedAt: new Date().toISOString(), limit: COURSE_SUMMARY_LIMIT, truncated: summaries.results.length > COURSE_SUMMARY_LIMIT,
       summaries: summaries.results.slice(0, COURSE_SUMMARY_LIMIT).map(view),
       organizations: organizations.results.map(row => ({ id: row.id, name: row.name, active: Boolean(row.active) })),

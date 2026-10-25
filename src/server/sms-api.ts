@@ -134,6 +134,67 @@ async function adminData(db: D1Database, env: SmsRuntime): Promise<Response> {
   return json({ organizations: organizations.results.map(organizationView), programs: programs.results.map(programView), teachers: teachers.results.map(r => ({ id: r.id, name: r.name, phone: r.phone, programId: r.program_id, organizationId: r.organization_id, active: Boolean(r.active), createdAt: r.created_at })),
     records: records.results.map(r => ({ id: r.id, messageSid: r.message_sid, senderPhone: r.sender_phone, body: r.body, status: r.status, reason: r.reason, organizationName: r.organization_name, programName: r.program_name, attendees: r.attendees, sessionMinutes: r.session_minutes, receivedAt: r.received_at, reprocessedBy: r.reprocessed_by, processedAt: r.processed_at })), stats, inboundNumber: env.TWILIO_PHONE_NUMBER ?? null, webhookConfigured: webhookConfigured(env) });
 }
+
+// Course maintenance needs names and stable relationships, not the SMS admin
+// payload. Keep both the SELECT list and response allowlist deliberately narrow.
+async function courseMetadata(db: D1Database, url: URL): Promise<Response> {
+  if ([...url.searchParams.keys()].some(key => key !== 'organizationId') || url.searchParams.getAll('organizationId').length > 1) throw new SmsError(400, 'INVALID_QUERY', 'Choose one organization filter.');
+  const organizationId = url.searchParams.has('organizationId') ? idField(url.searchParams.get('organizationId')) : null;
+  if (organizationId && !await db.prepare('SELECT id FROM sms_organizations WHERE id=?').bind(organizationId).first()) throw new SmsError(404, 'ORGANIZATION_NOT_FOUND', 'This organization was not found.');
+  const organizations = await db.prepare('SELECT id,name,active FROM sms_organizations ORDER BY name,id').all<Record<string, unknown>>();
+  const programs = await db.prepare('SELECT id,organization_id,name,active FROM sms_programs' + (organizationId ? ' WHERE organization_id=?' : '') + ' ORDER BY name,id').bind(...(organizationId ? [organizationId] : [])).all<Record<string, unknown>>();
+  return json({
+    organizations: organizations.results.map(row => ({ id: row.id, name: row.name, active: Boolean(row.active) })),
+    programs: programs.results.map(row => ({ id: row.id, organizationId: row.organization_id, name: row.name, active: Boolean(row.active) })),
+  });
+}
+async function mutateCourseMetadata(db: D1Database, body: Record<string, unknown>): Promise<Response> {
+  const now = new Date().toISOString();
+  if (body.action === 'organization') {
+    only(body, ['action', 'id', 'createId', 'name']);
+    if (body.id !== undefined && body.createId !== undefined) throw new SmsError(400, 'INVALID_ID', 'Use either an existing record ID or a new create ID, not both.');
+    const id = body.id !== undefined ? idField(body.id) : body.createId !== undefined ? idField(body.createId) : crypto.randomUUID(); const name = nameField(body.name);
+    if (body.id !== undefined) {
+      // Do not pass this through general admin mutation: omitted active there
+      // defaults to true. A rename must preserve active, slug and SMS attribution.
+      const result = await db.prepare('UPDATE sms_organizations SET name=?,updated_at=? WHERE id=?').bind(name, now, id).run();
+      if (!result.meta.changes) throw new SmsError(404, 'NOT_FOUND', 'Organization not found.');
+    } else {
+      const slug = `${name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0,47) || 'organization'}-${id.replaceAll('-', '')}`;
+      // The draft's create ID survives an uncertain network response. Replays
+      // insert nothing and must match; they never overwrite a later rename.
+      const result = await db.prepare('INSERT INTO sms_organizations(id,name,slug,created_at,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(id) DO NOTHING').bind(id, name, slug, now, now).run();
+      if (!result.meta.changes) {
+        const existing = await db.prepare('SELECT name FROM sms_organizations WHERE id=?').bind(id).first<{ name: string }>();
+        if (!existing || existing.name !== name) throw new SmsError(409, 'CREATE_CONFLICT', 'This create ID is already used for different organization details. Refresh before trying again.');
+        return json({ ok: true, id });
+      }
+    }
+    return json({ ok: true, id }, body.id === undefined ? 201 : 200);
+  }
+  if (body.action === 'program') {
+    only(body, ['action', 'id', 'createId', 'organizationId', 'name']);
+    if (body.id !== undefined && body.createId !== undefined) throw new SmsError(400, 'INVALID_ID', 'Use either an existing record ID or a new create ID, not both.');
+    const id = body.id !== undefined ? idField(body.id) : body.createId !== undefined ? idField(body.createId) : crypto.randomUUID(); const organizationId = idField(body.organizationId); const name = nameField(body.name);
+    if (!await db.prepare('SELECT id FROM sms_organizations WHERE id=?').bind(organizationId).first()) throw new SmsError(400, 'ORGANIZATION_REQUIRED', 'Choose an existing organization.');
+    if (body.id !== undefined) {
+      const existing = await db.prepare('SELECT organization_id FROM sms_programs WHERE id=?').bind(id).first<{ organization_id: string }>();
+      if (!existing) throw new SmsError(404, 'NOT_FOUND', 'Program not found.');
+      if (existing.organization_id !== organizationId) throw new SmsError(409, 'PROGRAM_ORGANIZATION_FIXED', 'A program stays with its organization. Create a new program in the other organization.');
+      const result = await db.prepare('UPDATE sms_programs SET name=?,updated_at=? WHERE id=? AND organization_id=?').bind(name, now, id, organizationId).run();
+      if (!result.meta.changes) throw new SmsError(404, 'NOT_FOUND', 'Program not found.');
+    } else {
+      const result = await db.prepare('INSERT INTO sms_programs(id,organization_id,name,created_at,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(id) DO NOTHING').bind(id, organizationId, name, now, now).run();
+      if (!result.meta.changes) {
+        const existing = await db.prepare('SELECT name,organization_id FROM sms_programs WHERE id=?').bind(id).first<{ name: string; organization_id: string }>();
+        if (!existing || existing.name !== name || existing.organization_id !== organizationId) throw new SmsError(409, 'CREATE_CONFLICT', 'This create ID is already used for different program details. Refresh before trying again.');
+        return json({ ok: true, id });
+      }
+    }
+    return json({ ok: true, id }, body.id === undefined ? 201 : 200);
+  }
+  throw new SmsError(400, 'INVALID_ACTION', 'Choose an organization or program name to maintain.');
+}
 async function mutate(db: D1Database, body: Record<string, unknown>, userId: string): Promise<Response> {
   const now = new Date().toISOString();
   if (body.action === 'retry') {
@@ -206,6 +267,11 @@ export async function handleSmsApi(request: Request, env: SmsRuntime): Promise<R
     }
     const userId = requireAdmin(request, env);
     if (!env.DB) throw new SmsError(503, 'STORAGE_UNAVAILABLE', 'SMS storage is unavailable.');
+    if (path === '/api/sms/course-metadata') {
+      if (request.method === 'GET') return await courseMetadata(env.DB, url);
+      if (request.method === 'POST') { requireOrigin(request); return await mutateCourseMetadata(env.DB, await readJson(request)); }
+      throw new SmsError(405, 'METHOD_NOT_ALLOWED', 'Use GET or POST for course metadata.');
+    }
     if (path === '/api/sms/summaries') { if (request.method === 'POST') requireOrigin(request); return await handleCourseSummaries(request, env.DB); }
     if (path === '/api/sms/report' && request.method === 'GET') return await handleSmsReport(env.DB, url);
     if (path === '/api/sms/dashboard' && request.method === 'GET') return await dashboard(env.DB, url);

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { Activity, ArrowLeft, ArrowUpRight, CalendarDays, Check, Copy, Download, FileText, Info, MessageSquare, Printer, RefreshCw } from 'lucide-react';
-import CourseSummaries from '@/components/CourseSummaries';
 import { SmsAccess, SmsMetrics, smsNumber, useSmsLive } from '@/components/SmsDashboard';
 import { fundingStory, formatReportDate, parseReportSelection, recordedComparison, REPORT_METHOD, type ReportSelection, type SmsReport } from '@/lib/sms-report';
 import { DEMO_REPORT_TODAY, demoSmsReport } from '@/lib/sms-report-demo';
@@ -150,7 +149,7 @@ export default function SmsReports({ demo = false, organizationId }: { demo?: bo
       <div className="sms-report-tabs" role="tablist" aria-label="Report type"><button id="sms-activity-tab" role="tab" type="button" aria-selected={tab === 'activity'} aria-controls="sms-activity-panel" tabIndex={tab === 'activity' ? 0 : -1} onKeyDown={navigateTabs} onClick={() => selectTab('activity')}><Activity size={16}/> Recorded activity</button><button id="sms-summaries-tab" role="tab" type="button" aria-selected={tab === 'summaries'} aria-controls="sms-summaries-panel" tabIndex={tab === 'summaries' ? 0 : -1} onKeyDown={navigateTabs} disabled={demo} onClick={() => selectTab('summaries')}><FileText size={16}/> Course summaries{demo && <small>Live workspace</small>}</button></div>
     </div>
     <div id="sms-activity-panel" role="tabpanel" aria-labelledby="sms-activity-tab" hidden={tab !== 'activity'}>{demo ? <DemoRecordedActivity/> : <LiveRecordedActivity organizationId={organizationId}/>}</div>
-    {!demo && summariesVisited && <div id="sms-summaries-panel" className="sms-no-print" role="tabpanel" aria-labelledby="sms-summaries-tab" hidden={tab !== 'summaries'}><CourseSummaries organizationId={organizationId}/></div>}
+    {!demo && summariesVisited && <div id="sms-summaries-panel" className="sms-no-print" role="tabpanel" aria-labelledby="sms-summaries-tab" hidden={tab !== 'summaries'}><section className="sms-panel" style={{ padding: 28 }}><h2>Course information has its own workspace.</h2><p style={{ margin: '14px 0 20px', lineHeight: 1.8 }}>Edit existing courses or use one for another run, without going through reports or SMS setup.</p><a className="sms-button sms-primary" href={`/courses${organizationId ? `?organizationId=${encodeURIComponent(organizationId)}` : ''}`}>Open My courses</a></section></div>}
     {tab === 'summaries' && <p className="sms-report-print-unavailable">Open Recorded activity to prepare and print a sourced activity brief. Course summaries are kept separate.</p>}
   </div>;
 }

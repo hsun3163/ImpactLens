@@ -4,7 +4,7 @@ export const COURSE_SUMMARY_LIMIT = 100;
 export const COURSE_SUMMARY_STATUSES = ['planned', 'in-progress', 'completed'] as const;
 export type CourseSummaryStatus = typeof COURSE_SUMMARY_STATUSES[number];
 export const COURSE_SUMMARY_STATUS_LABELS: Record<CourseSummaryStatus, string> = {
-  planned: 'Planned', 'in-progress': 'In progress', completed: 'Completed',
+  planned: 'Planned', 'in-progress': 'In Progress', completed: 'Completed',
 };
 export type CourseSummaryValues = {
   organizationId: string; programId: string; facility: string | null; yard: string | null;
